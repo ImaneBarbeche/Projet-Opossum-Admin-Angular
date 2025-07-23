@@ -47,7 +47,7 @@
         />
       </div>
 
-      <!-- Statut -->
+      <!-- Statut - RESPECTE LES RÈGLES : PAS D'ARCHIVED EN SÉLECTION -->
       <div class="filter-group">
         <label class="filter-label">Statut</label>
         <select
@@ -58,9 +58,11 @@
           <option value="ALL">Tous les statuts</option>
           <option value="ACTIVE">✅ Actives</option>
           <option value="RESOLVED">🎉 Résolues</option>
+          <!-- ❌ ARCHIVED pas proposé en sélection selon les règles -->
           @if (isAdmin()) {
-            <option value="ARCHIVED">📦 Archivées</option>
-            <option value="DELETED">🗑️ Supprimées</option>
+            <!-- Options admin uniquement pour voir les statuts cachés -->
+            <option value="ARCHIVED">📦 Archivées (Admin)</option>
+            <option value="DELETED">🗑️ Supprimées (Admin)</option>
           }
         </select>
       </div>
@@ -79,7 +81,7 @@
         </select>
       </div>
 
-      <!-- ✅ CATEGORIES CORRIGÉES -->
+      <!-- Catégories -->
       <div class="filter-group">
         <label class="filter-label">Catégorie</label>
         <select
@@ -96,35 +98,9 @@
           <option value="BAGS">🎒 Sacs</option>
           <option value="JEWELRY">💍 Bijoux</option>
           <option value="PETS">🐕 Animaux</option>
-          <option value="VEHICLES">🚗 Véhicules</option>
           <option value="OTHER">📦 Autre</option>
         </select>
       </div>
-
-      <!-- Toggles Admin -->
-      @if (isAdmin()) {
-        <div class="filter-group">
-          <label class="filter-toggle">
-            <input
-              type="checkbox"
-              [checked]="includeArchived()"
-              (change)="toggleArchived()"
-            />
-            <span class="toggle-label">Inclure archivées</span>
-          </label>
-        </div>
-
-        <div class="filter-group">
-          <label class="filter-toggle">
-            <input
-              type="checkbox"
-              [checked]="includeDeleted()"
-              (change)="toggleDeleted()"
-            />
-            <span class="toggle-label">Inclure supprimées</span>
-          </label>
-        </div>
-      }
 
       <!-- Actions -->
       <div class="filter-actions">
@@ -155,7 +131,7 @@
     </div>
   }
 
-  <!-- ===== LISTE DES LISTINGS ===== -->
+  <!-- ===== LISTE DES ANNONCES ===== -->
   @if (!isLoading() && !error()) {
     <div class="listings-grid">
       @for (listing of listings(); track listing.id) {
@@ -164,55 +140,77 @@
           <!-- Header de la card -->
           <div class="card-header">
             <div class="card-badges">
+              <!-- Badge statut avec indication spéciale pour RESOLVED -->
               <span class="badge status-badge" [class]="getStatusBadgeClass(listing.status)">
-                {{ getStatusIcon(listing.status) }} {{ listing.status }}
+                {{ getStatusIcon(listing.status) }} {{ getStatusLabel(listing.status) }}
+                @if (listing.status === ListingStatus.RESOLVED) {
+                  <small class="resolved-badge">RETROUVÉ</small>
+                }
               </span>
+              
               <span class="badge type-badge" [class]="getTypeBadgeClass(listing.type)">
                 {{ listing.type === ListingType.LOST ? '🔍 Perdu' : '✅ Trouvé' }}
               </span>
+              
               <span class="category-badge">
                 {{ getCategoryIcon(listing.category) }} {{ listing.category }}
               </span>
             </div>
             
-            <!-- Actions -->
+            <!-- Actions selon les RÈGLES DE TRANSITION -->
             <div class="card-actions">
+              
+              <!-- ACTIVE → RESOLVED : User/Admin -->
               @if (canResolve(listing)) {
                 <button
                   class="action-btn resolve"
                   (click)="markAsResolved(listing)"
-                  title="Marquer comme résolu"
+                  title="Marquer comme résolu (objet retrouvé)"
                 >
-                  🎉
+                  🎉 Résoudre
                 </button>
               }
               
+              <!-- ACTIVE/RESOLVED → ARCHIVED : Admin uniquement -->
               @if (canArchive(listing)) {
                 <button
                   class="action-btn archive"
                   (click)="archiveListing(listing)"
-                  title="Archiver (Admin)"
+                  title="Archiver (masquer du public) - Admin uniquement"
                 >
-                  📦
+                  📦 Archiver
                 </button>
               }
               
+              <!-- ACTIVE/RESOLVED → DELETED : User(auteur)/Admin -->
+              <!-- ARCHIVED → DELETED : Admin uniquement -->
               @if (canDelete(listing)) {
                 <button
                   class="action-btn delete"
                   (click)="deleteListing(listing)"
-                  title="Supprimer"
+                  title="Supprimer définitivement"
                 >
-                  🗑️
+                  🗑️ Supprimer
+                </button>
+              }
+              
+              <!-- RESOLVED → ACTIVE : Admin uniquement (bonus) -->
+              @if (canReactivate(listing)) {
+                <button
+                  class="action-btn reactivate"
+                  (click)="reactivateListing(listing)"
+                  title="Réactiver l'annonce - Admin uniquement"
+                >
+                  ↩️ Réactiver
                 </button>
               }
               
               <button
                 class="action-btn view"
-                [routerLink]="['/listings', listing.id]"
+                (click)="viewListingDetails(listing)"
                 title="Voir détails"
               >
-                👁️
+                👁️ Détails
               </button>
             </div>
           </div>
@@ -220,13 +218,14 @@
           <!-- Contenu -->
           <div class="card-content">
             <h3 class="listing-title">{{ listing.title }}</h3>
-            <p class="listing-description">{{ listing.description }}</p>
+            <p class="listing-description">
+              {{ listing.description | slice:0:150 }}{{ listing.description.length > 150 ? '...' : '' }}
+            </p>
             
-            <!-- ✅ IMAGE SI DISPONIBLE -->
-            @if (listing.photo_url || (listing.images && listing.images.length > 0)) {
+            @if (listing.photo_url) {
               <div class="listing-image">
                 <img 
-                  [src]="listing.photo_url || listing.images![0]" 
+                  [src]="listing.photo_url" 
                   [alt]="listing.title"
                   class="card-image"
                 />
@@ -234,41 +233,62 @@
             }
             
             <div class="listing-meta">
+              <!-- Contact -->
               <div class="meta-item">
-                <strong>👤 Utilisateur:</strong>
-                {{ listing.user_name }} ({{ listing.user_email }})
+                <strong>📧 Contact:</strong>
+                {{ listing.contact_email }}
+                @if (listing.contact_phone) {
+                  <span class="phone">| 📞 {{ listing.contact_phone }}</span>
+                }
               </div>
+              
+              <!-- Localisation -->
               <div class="meta-item">
                 <strong>📍 Lieu:</strong>
-                {{ listing.location }}, {{ listing.city }}
-              </div>
-              <div class="meta-item">
-                <strong>📅 Créé:</strong>
-                {{ formatDate(listing.created_at) }}
+                {{ listing.address }}, {{ listing.city }}
               </div>
               
-              <!-- Infos selon statut -->
+              <!-- Date de création -->
+              <div class="meta-item">
+                <strong>📅 Créée:</strong>
+                {{ formatDate(listing.created_at) }}
+                <small class="age-indicator">({{ getListingAge(listing) }})</small>
+              </div>
+              
+              <!-- Date de résolution - SELON LES RÈGLES -->
               @if (listing.status === ListingStatus.RESOLVED && listing.resolved_at) {
                 <div class="meta-item resolved-info">
-                  <strong>🎉 Résolu:</strong>
+                  <strong>🎉 Résolue le:</strong>
                   {{ formatDate(listing.resolved_at) }}
+                  <small class="resolution-time">
+                    ({{ getResolutionTime(listing) }})
+                  </small>
                 </div>
               }
               
-              @if (listing.status === ListingStatus.ARCHIVED && listing.archived_at) {
-                <div class="meta-item archived-info">
-                  <strong>📦 Archivé:</strong>
-                  {{ formatDate(listing.archived_at) }}
-                  @if (listing.archive_reason) {
-                    <span class="reason">({{ listing.archive_reason }})</span>
+              <!-- Modification récente -->
+              @if (listing.updated_at && isRecentlyUpdated(listing)) {
+                <div class="meta-item updated-info">
+                  <strong>🔄 Modifiée:</strong>
+                  {{ formatDate(listing.updated_at) }}
+                </div>
+              }
+              
+              <!-- Informations admin -->
+              @if (isAdmin()) {
+                <div class="admin-meta">
+                  <small class="admin-info">
+                    <strong>ID:</strong> {{ listing.id }} | 
+                    <strong>Auteur:</strong> {{ listing.user_id }} |
+                    <strong>Lost flag:</strong> {{ listing.is_lost ? 'Oui' : 'Non' }}
+                  </small>
+                  
+                  <!-- Indicateur d'archivage automatique potentiel -->
+                  @if (shouldShowArchiveWarning(listing)) {
+                    <div class="archive-warning">
+                      ⚠️ <small>Annonce ancienne - Archivage automatique possible</small>
+                    </div>
                   }
-                </div>
-              }
-              
-              @if (listing.status === ListingStatus.DELETED && listing.deleted_at) {
-                <div class="meta-item deleted-info">
-                  <strong>🗑️ Supprimé:</strong>
-                  {{ formatDate(listing.deleted_at) }}
                 </div>
               }
             </div>
@@ -278,7 +298,15 @@
         <div class="empty-state">
           <div class="empty-icon">📭</div>
           <h3>Aucune annonce trouvée</h3>
-          <p>Aucune annonce ne correspond aux critères de recherche.</p>
+          <p>
+            @if (selectedStatus() === 'ARCHIVED') {
+              Aucune annonce archivée trouvée.
+            } @else if (selectedStatus() === 'DELETED') {
+              Aucune annonce supprimée trouvée.
+            } @else {
+              Aucune annonce ne correspond aux critères de recherche.
+            }
+          </p>
           <button class="btn btn-primary" (click)="resetFilters()">
             🔄 Réinitialiser les filtres
           </button>

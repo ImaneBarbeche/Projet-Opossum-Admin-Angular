@@ -161,7 +161,29 @@ export class AuthService {
     }
   }
 
-  // 🚫 MÉTHODES SUPPRIMÉES - Plus de localStorage !
-  // getToken() - SUPPRIMÉ
-  // Toute référence à localStorage - SUPPRIMÉ
+   //  Vérification du rôle admin
+  isAdmin(): boolean {
+    const currentUser = this.getCurrentUser();
+    return currentUser?.role?.toLowerCase() === 'admin';
+  }
+
+  //  Vérification de rôle générique (optionnelle)
+  hasRole(role: string): boolean {
+    const currentUser = this.getCurrentUser();
+    return currentUser?.role?.toLowerCase() === role.toLowerCase();
+  }
+
+  //  Vérification de permissions (optionnelle)
+  hasPermission(permission: string): boolean {
+    const currentUser = this.getCurrentUser();
+    
+    // Si admin, accès à tout
+    if (this.isAdmin()) {
+      return true;
+    }
+    
+
+    return false;
+  }
+
 }

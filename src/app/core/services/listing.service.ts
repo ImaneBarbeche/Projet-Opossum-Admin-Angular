@@ -1,33 +1,19 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { 
-  Listing, 
-  ListingStatus, 
-  ListingType, 
-  ListingCategory, 
-  ListingFilters 
-} from '../models/listing.model';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { Listing, ListingFilters, ListingResponse, ListingStatus } from '../models/listing.model';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class ListingService {
-  private readonly apiUrl = `${environment.apiUrl}/listings`;
-  private readonly http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/admin/listings`;
 
-  // State management des filtres
-  private readonly filtersSubject = new BehaviorSubject<ListingFilters>({
-    status: 'ALL',
-    type: 'ALL',
-    category: 'ALL',
-    includeArchived: false,
-    includeDeleted: false
-  });
-  
-  readonly filters$ = this.filtersSubject.asObservable();
+  constructor(private http: HttpClient) {}
 
-  // ✅ GET LISTINGS avec filtres
-  getListings(filters?: ListingFilters): Observable<Listing[]> {
+  // Récupérer toutes les annonces avec filtres
+  getAllListings(filters?: ListingFilters): Observable<ListingResponse> {
     let params = new HttpParams();
     
     if (filters) {
@@ -46,12 +32,6 @@ export class ListingService {
       if (filters.search) {
         params = params.set('search', filters.search);
       }
-      if (filters.includeArchived) {
-        params = params.set('includeArchived', 'true');
-      }
-      if (filters.includeDeleted) {
-        params = params.set('includeDeleted', 'true');
-      }
       if (filters.limit) {
         params = params.set('limit', filters.limit.toString());
       }
@@ -59,86 +39,52 @@ export class ListingService {
         params = params.set('offset', filters.offset.toString());
       }
     }
-    
-    return this.http.get<Listing[]>(this.apiUrl, { 
+
+    return this.http.get<ListingResponse>(this.apiUrl, { 
       params,
       withCredentials: true 
     });
   }
 
-  // ✅ MARQUER COMME RÉSOLU
-  markAsResolved(id: number, resolvedBy?: string): Observable<Listing> {
-    return this.http.patch<Listing>(`${this.apiUrl}/${id}/resolve`, {
-      resolved_by: resolvedBy,
-      resolved_at: new Date().toISOString()
-    }, {
-      withCredentials: true
-    });
-  }
-
-  // ✅ ARCHIVER (Admin seulement)
-  archiveListing(id: number, reason?: string): Observable<Listing> {
-    return this.http.patch<Listing>(`${this.apiUrl}/${id}/archive`, {
-      archive_reason: reason || 'Archivé par l\'administrateur',
-      archived_at: new Date().toISOString()
-    }, {
-      withCredentials: true
-    });
-  }
-
-  // ✅ SUPPRIMER (Soft delete)
-  deleteListing(id: number, reason?: string): Observable<Listing> {
-    return this.http.patch<Listing>(`${this.apiUrl}/${id}/delete`, {
-      delete_reason: reason,
-      deleted_at: new Date().toISOString()
-    }, {
-      withCredentials: true
-    });
-  }
-
-  // 🔍 GET LISTING BY ID
+  // Récupérer une annonce par ID
   getListingById(id: number): Observable<Listing> {
     return this.http.get<Listing>(`${this.apiUrl}/${id}`, {
       withCredentials: true
     });
   }
 
-  // ➕ CREATE NEW LISTING
-  createListing(listing: Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'>): Observable<Listing> {
-    return this.http.post<Listing>(this.apiUrl, {
-      ...listing,
-      status: ListingStatus.ACTIVE
-    }, {
+  // Bloquer une annonce
+  blockListing(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/block`, {}, {
       withCredentials: true
     });
   }
 
-  // ✏️ UPDATE LISTING
-  updateListing(id: number, listing: Partial<Omit<Listing, 'id' | 'status' | 'created_at' | 'updated_at'>>): Observable<Listing> {
-    return this.http.put<Listing>(`${this.apiUrl}/${id}`, listing, {
+  // Débloquer une annonce
+  unblockListing(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/unblock`, {}, {
       withCredentials: true
     });
   }
 
-  // 🔄 Gestion des filtres
-  updateFilters(filters: Partial<ListingFilters>): void {
-    const currentFilters = this.filtersSubject.value;
-    this.filtersSubject.next({ ...currentFilters, ...filters });
+  // Supprimer une annonce
+  deleteListing(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, {
+      withCredentials: true
+    });
   }
 
-  getCurrentFilters(): ListingFilters {
-    return this.filtersSubject.value;
+  // Archiver une annonce
+  archiveListing(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/archive`, {}, {
+      withCredentials: true
+    });
   }
 
-  // 🔎 RECHERCHE
-  searchListings(query: string, includeArchived: boolean = false): Observable<Listing[]> {
-    let params = new HttpParams()
-      .set('q', query)
-      .set('includeArchived', includeArchived.toString());
-    
-    return this.http.get<Listing[]>(`${this.apiUrl}/search`, { 
-      params,
-      withCredentials: true 
+  // Changer le statut d'une annonce
+  updateListingStatus(id: number, status: ListingStatus): Observable<Listing> {
+    return this.http.patch<Listing>(`${this.apiUrl}/${id}/status`, { status }, {
+      withCredentials: true
     });
   }
 }

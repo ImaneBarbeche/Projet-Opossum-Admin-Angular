@@ -1,17 +1,18 @@
-// ✅ STATUTS CONFORMES AU DOCUMENT (sans PENDING)
+// Enums : valeurs fixes autorisées
 export enum ListingStatus {
-  ACTIVE = 'ACTIVE',      // Visible publiquement
-  RESOLVED = 'RESOLVED',  // Objet retrouvé
-  ARCHIVED = 'ARCHIVED',  // Masqué du public
-  DELETED = 'DELETED'     // Soft delete
+  ACTIVE = 'ACTIVE',
+  RESOLVED = 'RESOLVED',
+  ARCHIVED = 'ARCHIVED',
+  DELETED = 'DELETED',
+  REJECTED = 'REJECTED',
+  PENDING = 'PENDING'
 }
 
 export enum ListingType {
-  LOST = 'LOST',   // Objet perdu
-  FOUND = 'FOUND'  // Objet trouvé
+  LOST = 'LOST',
+  FOUND = 'FOUND'
 }
 
-// ✅ CATEGORIES CORRIGÉES (sans VEHICLES)
 export enum ListingCategory {
   ELECTRONICS = 'ELECTRONICS',
   CLOTHING = 'CLOTHING',
@@ -21,10 +22,10 @@ export enum ListingCategory {
   BAGS = 'BAGS',
   JEWELRY = 'JEWELRY',
   PETS = 'PETS',
-  VEHICLES = 'VEHICLES',  // ← Ajout si nécessaire
   OTHER = 'OTHER'
 }
 
+// Interface : structure exacte de nos objets
 export interface Listing {
   id: number;
   title: string;
@@ -33,28 +34,20 @@ export interface Listing {
   category: ListingCategory;
   status: ListingStatus;
   user_id: number;
-  user_name?: string;
-  user_email?: string;
-  location: string;
+  address: string;
   city: string;
+  contact_email: string;
+  contact_phone?: string;
   latitude?: number;
   longitude?: number;
-  contact_info: string;
-  images?: string[];          // ← Array d'images
-  photo_url?: string;         // ← Ajout pour compatibilité
+  photo_url?: string;
   created_at: Date;
   updated_at: Date;
-  
-  // Champs pour les statuts
   resolved_at?: Date;
-  archived_at?: Date;
-  archived_by?: string;
-  archive_reason?: string;
-  deleted_at?: Date;
-  deleted_by?: string;
+  is_lost: boolean; // Correspond à votre colonne BDD
 }
 
-// ✅ FILTRES CORRIGES
+// Interface pour les filtres
 export interface ListingFilters {
   status?: ListingStatus | 'ALL';
   type?: ListingType | 'ALL';
@@ -65,4 +58,12 @@ export interface ListingFilters {
   includeDeleted?: boolean;
   limit?: number;
   offset?: number;
+}
+
+// Interface pour les réponses API
+export interface ListingResponse {
+  listings: Listing[];
+  total: number;
+  page: number;
+  limit: number;
 }
