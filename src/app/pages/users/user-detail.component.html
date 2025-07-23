@@ -1,0 +1,185 @@
+<!-- 👤 Page de détail utilisateur -->
+<div class="user-detail-container">
+  <!-- Header avec navigation -->
+  <div class="detail-header">
+    <button class="back-btn" (click)="goBack()">
+      <i class="icon">←</i>
+      Retour à la liste
+    </button>
+    
+    <div class="header-actions">
+      <button class="action-btn primary" (click)="editMode = !editMode">
+        {{ editMode ? 'Annuler' : 'Modifier' }}
+      </button>
+      @if (!editMode) {
+        <button class="action-btn warning" (click)="toggleUserStatus()">
+          {{ user?.is_active ? 'Suspendre' : 'Activer' }}
+        </button>
+        <button class="action-btn danger" (click)="deleteUser()">
+          Supprimer
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <p>Chargement des détails...</p>
+    </div>
+  } @else if (user) {
+    <!-- Informations principales -->
+    <div class="user-profile-card">
+      <div class="profile-header">
+        <div class="avatar-section">
+          <div class="user-avatar">
+            {{ user.first_name[0] }}{{ user.last_name[0] }}
+          </div>
+          <div class="status-badge" [class.active]="user.is_active">
+            {{ user.is_active ? 'Actif' : 'Inactif' }}
+          </div>
+        </div>
+        
+        <div class="user-info">
+          @if (!editMode) {
+            <h1 class="user-name">{{ user.first_name }} {{ user.last_name }}</h1>
+            <p class="user-email">{{ user.email }}</p>
+            <p class="user-role">{{ getRoleDisplay(user.role) }}</p>
+          } @else {
+            <div class="edit-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="first-name-input">Prénom</label>
+                  <input 
+                    id="first-name-input"
+                    type="text" 
+                    [(ngModel)]="editForm.first_name"
+                    class="form-input"
+                    placeholder="Prénom">
+                </div>
+                <div class="form-group">
+                  <label for="last-name-input">Nom</label>
+                  <input 
+                    id="last-name-input"
+                    type="text" 
+                    [(ngModel)]="editForm.last_name"
+                    class="form-input"
+                    placeholder="Nom">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="email-input">Email</label>
+                <input 
+                  id="email-input"
+                  type="email" 
+                  [(ngModel)]="editForm.email"
+                  class="form-input"
+                  placeholder="Email">
+              </div>
+              
+              <div class="form-group">
+                <label for="role-select">Rôle</label>
+                <select id="role-select" [(ngModel)]="editForm.role" class="form-select">
+                  <option value="user">Utilisateur</option>
+                  <option value="admin">Administrateur</option>
+                  <option value="moderator">Modérateur</option>
+                </select>
+              </div>
+              
+              <div class="form-actions">
+                <button class="action-btn success" (click)="saveUser()">
+                  Enregistrer
+                </button>
+                <button class="action-btn secondary" (click)="cancelEdit()">
+                  Annuler
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Détails complémentaires -->
+    <div class="details-grid">
+      <!-- Informations générales -->
+      <div class="detail-card">
+        <h3 class="card-title">📋 Informations générales</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <span class="info-label">ID utilisateur</span>
+            <span class="info-value">{{ user.id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Téléphone</span>
+            <span class="info-value">{{ user.phone || 'Non renseigné' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date d'inscription</span>
+            <span class="info-value">{{ formatDate(user.created_at) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Dernière connexion</span>
+            <span class="info-value">{{ formatDate(user.last_login_at) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email vérifié</span>
+            <span class="info-value" [class.verified]="user.is_email_verified">
+              {{ user.is_email_verified ? 'Oui' : 'Non' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="detail-card">
+        <h3 class="card-title">📊 Statistiques</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Annonces publiées</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Annonces actives</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Messages envoyés</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ calculateTrustScore(user) }}%</div>
+            <div class="stat-label">Score de confiance</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activité récente -->
+      <div class="detail-card activity-card">
+        <h3 class="card-title">🕒 Activité récente</h3>
+        <div class="activity-list">
+          @for (activity of recentActivity; track activity.id) {
+            <div class="activity-item">
+              <div class="activity-icon" [class]="activity.type">
+                {{ getActivityIcon(activity.type) }}
+              </div>
+              <div class="activity-content">
+                <p class="activity-text">{{ activity.description }}</p>
+                <span class="activity-date">{{ formatDate(activity.date) }}</span>
+              </div>
+            </div>
+          } @empty {
+            <p class="empty-activity">Aucune activité récente</p>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="error-container">
+      <h2>Utilisateur introuvable</h2>
+      <p>L'utilisateur demandé n'existe pas ou a été supprimé.</p>
+      <button class="action-btn primary" (click)="goBack()">
+        Retour à la liste
+      </button>
+    </div>
+  }

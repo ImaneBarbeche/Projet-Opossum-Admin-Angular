@@ -1,0 +1,59 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo/Titre Retrouv'It -->
+    <div class="navbar-brand">
+      <div class="logo">
+        <img src="logo.png" alt="Retrouv'It Logo" class="logo-icon">
+        <h2>Retrouv'It</h2>
+        <span class="admin-badge">Admin</span>
+      </div>
+    </div>
+
+    <!-- Bouton hamburger (mobile uniquement) -->
+<button class="navbar-toggle" (click)="toggleMenu()" aria-label="Menu mobile">
+  ☰
+</button>
+
+
+    <!-- Navigation principale -->
+    <div class="navbar-nav" [ngClass]="{ 'open': menuOpen }">
+      <a routerLink="/dashboard" 
+         routerLinkActive="active" 
+         class="nav-link">
+        📊 Dashboard
+      </a>
+      <a routerLink="/users" 
+         routerLinkActive="active" 
+         class="nav-link">
+        👥 Utilisateurs
+      </a>
+      <a routerLink="/annonces" 
+         routerLinkActive="active" 
+         class="nav-link">
+        📦 Annonces
+      </a>
+    </div>
+
+    <!-- Section utilisateur + logout -->
+    <div class="navbar-user">
+      <!-- Info utilisateur -->
+      @if (currentUser()) {
+        <span class="user-info">
+          👋 {{ currentUser()!.first_name }} {{ currentUser()!.last_name }}
+        </span>
+      }
+      
+      <!-- Bouton logout -->
+      <button class="logout-btn" 
+              (click)="logout()" 
+              title="Se déconnecter"
+              [disabled]="isLoggingOut()">
+        @if (isLoggingOut()) {
+          <span class="spinner"></span>
+        } @else {
+          🚪
+        }
+      </button>
+    </div>
+  </div>
+</nav>

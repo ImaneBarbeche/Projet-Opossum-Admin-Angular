@@ -1,0 +1,71 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header avec ton logo -->
+    <div class="login-header">
+      <div class="logo">
+        <img src="logo.png" alt="Retrouv'It Logo" class="logo-icon">
+        <h1>Retrouv'It</h1>
+      </div>
+      <p class="subtitle">Administration</p>
+    </div>
+
+
+    @if (loginForm) {
+    <!-- Formulaire de connexion -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+      <!-- Message d'erreur - Angular 20 syntaxe -->
+      @if (errorMessage()) {
+      <div class="error-message">
+        {{ errorMessage() }}
+      </div>
+      }
+
+      <!-- Champ Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" class="form-control"
+          [class.is-invalid]="isFieldInvalid('email')" placeholder="admin@opossum.com">
+
+        @if (isFieldInvalid('email')) {
+        <div class="invalid-feedback">
+          {{ getFieldError('email') }}
+        </div>
+        }
+      </div>
+
+      <!-- Champ Mot de passe -->
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input id="password" type="password" formControlName="password" class="form-control"
+          [class.is-invalid]="isFieldInvalid('password')" placeholder="admin">
+
+        @if (isFieldInvalid('password')) {
+        <div class="invalid-feedback">
+          {{ getFieldError('password') }}
+        </div>
+        }
+      </div>
+
+      <!-- Bouton de connexion -->
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="!isFormValid || isLoading()">
+
+        @if (isLoading()) {
+        <span class="loading-text">Connexion en cours...</span>
+        } @else {
+        <span>Se connecter</span>
+        }
+      </button>
+    </form>
+    }
+
+    <!-- Info de test -->
+    <div class="login-help">
+      <small>
+        <strong>Compte de test :</strong><br>
+        Email: admin&#64;opossum.com<br>
+        Mot de passe: admin
+      </small>
+    </div>
+  </div>
+</div>

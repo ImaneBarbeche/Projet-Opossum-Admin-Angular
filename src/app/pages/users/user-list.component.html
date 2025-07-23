@@ -1,0 +1,157 @@
+<div class="users-container">
+  <div class="users-header">
+    <h1 class="page-title">👥 Gestion des utilisateurs</h1>
+    <p class="page-subtitle">Gérez et modérez les comptes utilisateurs de la plateforme Retrouv'it</p>
+  </div>
+
+  <!-- Barre de recherche et filtres -->
+  <div class="filters-section">
+    <div class="search-bar">
+      <input 
+        type="text" 
+        placeholder="Rechercher par nom, email..." 
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+        class="search-input">
+      <button class="search-btn">🔍</button>
+    </div>
+    
+    <div class="filter-buttons">
+      <button 
+        class="filter-btn" 
+        [class.active]="currentFilter === 'all'"
+        (click)="setFilter('all')">
+        Tous ({{ totalUsers }})
+      </button>
+      <button 
+        class="filter-btn" 
+        [class.active]="currentFilter === 'active'"
+        (click)="setFilter('active')">
+        Actifs ({{ activeUsers }})
+      </button>
+      <button 
+        class="filter-btn" 
+        [class.active]="currentFilter === 'blocked'"
+        (click)="setFilter('blocked')">
+        Bloqués ({{ blockedUsers }})
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <p>Chargement des utilisateurs...</p>
+    </div>
+  }
+
+  <!-- Liste des utilisateurs -->
+  @else if (filteredUsers && filteredUsers.length > 0) {
+    <div class="users-grid">
+      @for (user of filteredUsers; track user.id) {
+        <div class="user-card" [class.blocked]="!user.is_active">
+          <div class="user-avatar">
+            @if (user.avatar) {
+              <img [src]="user.avatar" [alt]="user.first_name + ' ' + user.last_name" />
+            } @else {
+              <div class="avatar-placeholder">{{ getInitials(user.first_name + ' ' + user.last_name) }}</div>
+            }
+          </div>
+          
+          <div class="user-info">
+            <h3 class="user-name">{{ user.first_name }} {{ user.last_name }}</h3>
+            <p class="user-email">{{ user.email }}</p>
+            <div class="user-meta">
+              <span class="join-date">Inscrit le {{ formatDate(user.created_at) }}</span>
+              <span class="user-role">{{ user.role }}</span>
+            </div>
+            
+            <div class="user-status">
+              @if (!user.is_active) {
+                <span class="status-badge blocked">🚫 Bloqué</span>
+              } @else if (user.is_active && user.is_email_verified) {
+                <span class="status-badge active">✅ Actif</span>
+              } @else {
+                <span class="status-badge inactive">⏸️ Non vérifié</span>
+              }
+            </div>
+          </div>
+          
+          <div class="user-actions">
+            <button 
+              class="action-btn primary" 
+              (click)="viewUserDetails(user.id.toString())"
+              title="Voir les détails">
+              👁️
+            </button>
+            
+            @if (user.is_active) {
+              <button 
+                class="action-btn warning" 
+                (click)="blockUser(user.id.toString())"
+                title="Bloquer l'utilisateur">
+                🚫
+              </button>
+            } @else {
+              <button 
+                class="action-btn success" 
+                (click)="unblockUser(user.id.toString())"
+                title="Débloquer l'utilisateur">
+                ✅
+              </button>
+            }
+            
+            <button 
+              class="action-btn danger" 
+              (click)="deleteUser(user.id.toString())"
+              title="Supprimer l'utilisateur">
+              🗑️
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === 1"
+          (click)="previousPage()">
+          ← Précédent
+        </button>
+        
+        <div class="page-numbers">
+          @for (pageNum of getPageNumbers(); track pageNum) {
+            <button 
+              class="page-number" 
+              [class.active]="pageNum === currentPage"
+              (click)="goToPage(pageNum)">
+              {{ pageNum }}
+            </button>
+          }
+        </div>
+        
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+          Suivant →
+        </button>
+      </div>
+      
+      <div class="pagination-info">
+        Affichage {{ getDisplayStart() }} - {{ getDisplayEnd() }} sur {{ getTotalFiltered() }} utilisateurs
+      </div>
+    }
+  }
+
+  <!-- État vide -->
+  @else {
+    <div class="empty-state">
+      <h3>Aucun utilisateur trouvé</h3>
+      <p>Aucun utilisateur ne correspond à vos critères de recherche.</p>
+    </div>
+  }
+</div>

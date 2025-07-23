@@ -1,0 +1,498 @@
+/* 📦 Container principal des annonces */
+.listings-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 📋 Header de page */
+.listings-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  font-size: 28px;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.page-subtitle {
+  color: #7f8c8d;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 🔍 Section filtres et recherche */
+.filters-section {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.search-btn {
+  padding: 12px 16px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.search-btn:hover {
+  background: #2980b9;
+}
+
+/* 🏷️ Contrôles de filtre */
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a6c7d;
+  min-width: 80px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #5a6c7d;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.filter-btn.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.filter-btn.lost.active {
+  background: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.filter-btn.found.active {
+  background: #27ae60;
+  border-color: #27ae60;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  min-width: 160px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+/* 📦 Grille des annonces */
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.listing-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.listing-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.listing-card.pending {
+  border-left: 4px solid #f39c12;
+}
+
+.listing-card.active {
+  border-left: 4px solid #27ae60;
+}
+
+.listing-card.resolved {
+  border-left: 4px solid #3498db;
+}
+
+.listing-card.rejected {
+  border-left: 4px solid #e74c3c;
+  opacity: 0.7;
+}
+
+.listing-card.archived {
+  border-left: 4px solid #95a5a6;
+  opacity: 0.8;
+}
+
+/* 🖼️ Image et badges */
+.listing-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.listing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  font-size: 48px;
+  color: #adb5bd;
+}
+
+.listing-badges {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.type-badge, .status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
+}
+
+.type-badge.lost {
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+}
+
+.type-badge.found {
+  background: rgba(39, 174, 96, 0.9);
+  color: white;
+}
+
+.status-badge.pending {
+  background: rgba(243, 156, 18, 0.9);
+  color: white;
+}
+
+.status-badge.active {
+  background: rgba(39, 174, 96, 0.9);
+  color: white;
+}
+
+.status-badge.resolved {
+  background: rgba(52, 152, 219, 0.9);
+  color: white;
+}
+
+.status-badge.rejected {
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+}
+
+.status-badge.archived {
+  background: rgba(149, 165, 166, 0.9);
+  color: white;
+}
+
+/* 📝 Informations de l'annonce */
+.listing-info {
+  padding: 16px;
+}
+
+.listing-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.listing-description {
+  font-size: 14px;
+  color: #7f8c8d;
+  line-height: 1.4;
+  margin: 0 0 12px 0;
+}
+
+.listing-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.meta-label {
+  font-size: 12px;
+  color: #95a5a6;
+  font-weight: 500;
+}
+
+.meta-value {
+  font-size: 12px;
+  color: #5a6c7d;
+  font-weight: 500;
+}
+
+/* 🎯 Actions sur les annonces */
+.listing-actions {
+  padding: 12px 16px;
+  border-top: 1px solid #f8f9fa;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn.primary {
+  background: #3498db;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #2980b9;
+}
+
+.action-btn.success {
+  background: #27ae60;
+  color: white;
+}
+
+.action-btn.success:hover {
+  background: #229954;
+}
+
+.action-btn.warning {
+  background: #f39c12;
+  color: white;
+}
+
+.action-btn.warning:hover {
+  background: #e67e22;
+}
+
+.action-btn.danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.action-btn.danger:hover {
+  background: #c0392b;
+}
+
+.action-btn.secondary {
+  background: #95a5a6;
+  color: white;
+}
+
+.action-btn.secondary:hover {
+  background: #7f8c8d;
+}
+
+/* 📄 Pagination */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 16px 0;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pagination-info {
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #5a6c7d;
+  transition: all 0.2s ease;
+  min-width: 36px;
+  text-align: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #3498db;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.pagination-btn.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.pagination-btn.nav {
+  font-weight: 600;
+}
+
+/* 🔄 États de chargement */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #7f8c8d;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #7f8c8d;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  color: #5a6c7d;
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  .listings-container {
+    padding: 16px;
+  }
+
+  .filter-controls {
+    gap: 12px;
+  }
+
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .filter-label {
+    min-width: auto;
+  }
+
+  .listings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .listing-actions {
+    gap: 6px;
+  }
+
+  .action-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .pagination-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .pagination-controls {
+    order: -1;
+  }
+}

@@ -1,8 +1,24 @@
 import { Injectable } from '@angular/core';
+import { CanActivate, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Injectable({ providedIn: 'root' })
-export class AdminGuard {
+export class AdminGuard implements CanActivate {
+  
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router
+  ) {}
+
   canActivate(): boolean {
-    return true;
+    // 🔍 Vérifier si l'utilisateur est connecté
+    if (this.authService.isAuthenticated()) {
+      console.log('✅ Utilisateur authentifié - Accès autorisé');
+      return true;
+    } else {
+      console.log('❌ Utilisateur non connecté - Redirection vers login');
+      this.router.navigate(['/login']);
+      return false;
+    }
   }
 }

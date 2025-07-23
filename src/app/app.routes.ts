@@ -1,3 +1,44 @@
 import { Routes } from '@angular/router';
+import { LoginComponent } from './pages/auth/login.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { UserListComponent } from './pages/users/user-list.component';
+import { UserDetailComponent } from './pages/users/user-detail.component';
+import { ListingListComponent } from './pages/annonces/listingListcomponent';
+import { AuthGuard } from './core/guards/auth.guard';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  // 🔐 Route login (publique)
+  { path: 'login', component: LoginComponent },
+  
+  // 📊 Route dashboard (protégée)
+  { 
+    path: 'dashboard', 
+    component: DashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  
+  // 👥 Routes utilisateurs (protégées)
+  { 
+    path: 'users', 
+    component: UserListComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'users/:id', 
+    component: UserDetailComponent,
+    canActivate: [AuthGuard]
+  },
+
+  // 📦 Routes annonces (protégées)
+  { 
+    path: 'annonces', 
+    component: ListingListComponent,
+    canActivate: [AuthGuard]
+  },
+  
+  // 🏠 Redirection par défaut
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  
+  // 🚫 Route 404
+  { path: '**', redirectTo: '/login' }
+];

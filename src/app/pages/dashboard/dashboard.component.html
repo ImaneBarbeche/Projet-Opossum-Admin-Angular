@@ -1,0 +1,91 @@
+@if (isLoading) {
+  <div class="loading-container">
+    <p>Chargement du tableau de bord...</p>
+  </div>
+} @else if (stats) {
+  <div class="dashboard-container">
+    <!-- 👋 Encadré d'accueil admin -->
+    <div class="welcome-card">
+      <h2>🌟 Bienvenue dans l'Espace Administrateur <strong>Retrouv'It</strong></h2>
+      <p class="welcome-text">
+        Cette interface vous permet de gérer et modérer l'ensemble de l'application de 
+        signalement objets perdus et trouvés.<br>
+        Depuis ce tableau de bord, vous pouvez :
+      </p>
+      <ul class="welcome-list">
+        <li>Consulter les statistiques globales (utilisateurs, annonces, objets retrouvés),</li>
+        <li>Gérer les utilisateurs : recherche, tri, blocage ou suppression,</li>
+        <li>Superviser les annonces : modération, archivage, suppression,</li>
+        <li>Intervenir en cas de signalement ou de litige,</li>
+        <li>Accéder aux messages échangés entre utilisateurs (en cas de besoin et selon vos droits).</li>
+      </ul>
+      <p class="welcome-footer">
+        <strong>Merci de contribuer à la sécurité et au bon fonctionnement de la plateforme.</strong>
+      </p>
+    </div>
+
+    <h1 class="dashboard-title">Tableau de bord</h1>
+    
+    <!-- Cards de statistiques -->
+    <div class="stats-grid">
+      <div class="stat-card users-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <h3>Utilisateurs</h3>
+          <p class="stat-number">{{ stats.totalUsers }}</p>
+          <span class="stat-label">inscrits</span>
+        </div>
+      </div>
+
+      <div class="stat-card listings-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-content">
+          <h3>Annonces</h3>
+          <p class="stat-number">{{ stats.totalListings }}</p>
+          <span class="stat-label">publiées</span>
+        </div>
+      </div>
+
+      <div class="stat-card found-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <h3>Objets retrouvés</h3>
+          <p class="stat-number">{{ stats.resolvedThisMonth }}</p>
+          <span class="stat-label">ce mois</span>
+        </div>
+      </div>
+
+      <div class="stat-card revenue-card">
+        <div class="stat-icon">�</div>
+        <div class="stat-content">
+          <h3>Taux de résolution</h3>
+          <p class="stat-number">{{ stats.resolutionRate }}%</p>
+          <span class="stat-label">de succès</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section activité récente -->
+    <div class="recent-activity">
+      <h2>Activité récente</h2>
+      <div class="activity-grid">
+        <div class="activity-card">
+          <h3>Nouvelles inscriptions</h3>
+          <p class="activity-number">{{ stats.newUsersThisMonth }}</p>
+          <span class="activity-period">ce mois</span>
+        </div>
+        
+        <div class="activity-card">
+          <h3>Annonces en attente</h3>
+          <p class="activity-number">{{ stats.pendingListings }}</p>
+          <span class="activity-period">à valider</span>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="error-container">
+    <p>❌ Erreur de chargement des statistiques</p>
+    <button class="retry-btn" (click)="ngOnInit()">Réessayer</button>
+  </div>
+}
