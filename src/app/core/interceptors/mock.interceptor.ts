@@ -6,14 +6,97 @@ import { environment } from '../../../environments/environment';
 import { UserRole } from '../models/user.model';
 
 @Injectable()
+
 export class MockInterceptor implements HttpInterceptor {
-
-
   // 🍪 Variable globale pour simuler l'état de session (remplace localStorage)
   private mockSessionActive = false;
+  // 🍪 Simule le cookie de session (stocké côté mock, mais vérifié via header)
+  private mockSessionCookie = '';
+
+  // 🗄️ Base mock persistante des utilisateurs (id, blocked_until, is_active...)
+  private mockUsers: any[] = [
+    {
+      id: 1,
+      first_name: 'Alice',
+      last_name: 'Martin',
+      email: 'alice@example.com',
+      role: UserRole.USER,
+      password_hash: 'hash1',
+      is_active: true,
+      is_email_verified: true,
+      created_at: '2025-01-15T10:00:00Z',
+      updated_at: '2025-07-20T15:30:00Z',
+      avatar: 'https://picsum.photos/100/100?random=1',
+      blocked_until: null
+    },
+    {
+      id: 2,
+      first_name: 'Bob',
+      last_name: 'Durand',
+      email: 'bob@example.com',
+      role: UserRole.USER,
+      password_hash: 'hash2',
+      is_active: true,
+      is_email_verified: false,
+      created_at: '2025-02-10T14:20:00Z',
+      updated_at: '2025-07-18T09:15:00Z',
+      blocked_until: null
+    },
+    {
+      id: 3,
+      first_name: 'Claire',
+      last_name: 'Lemoine',
+      email: 'claire@example.com',
+      role: UserRole.USER,
+      password_hash: 'hash3',
+      is_active: false,
+      is_email_verified: true,
+      created_at: '2025-03-05T16:45:00Z',
+      updated_at: '2025-07-15T11:20:00Z',
+      blocked_until: '2025-12-31T23:59:59Z'
+    }
+  ];
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    
+    // Initialisation des variables url et method
+    const url = req.url;
+    const method = req.method;
+    // Récupérer le cookie de la requête
+    const cookieHeader = req.headers.get('cookie') || '';
+    const hasMockSessionCookie = cookieHeader.includes('session=mock');
+
+
+    // === MOCK BLOCK/UNBLOCK USER ===
+    // 🚫 Bloquer un utilisateur
+    if (url.match(/\/admin\/users\/(\d+)\/block$/) && method === 'PUT') {
+      const userId = parseInt(url.split('/')[url.split('/').length - 2]);
+      const blocked_until = req.body.blocked_until;
+      const user = this.mockUsers.find(u => u.id === userId);
+      if (user) {
+        user.blocked_until = blocked_until;
+        user.is_active = false;
+        user.updated_at = new Date().toISOString();
+      }
+      return of(new HttpResponse({
+        status: 200,
+        body: user ? { ...user } : { id: userId, blocked_until, is_active: false, updated_at: new Date().toISOString() }
+      })).pipe(delay(400));
+    }
+
+    // ✅ Débloquer un utilisateur
+    if (url.match(/\/admin\/users\/(\d+)\/unblock$/) && method === 'PUT') {
+      const userId = parseInt(url.split('/')[url.split('/').length - 2]);
+      const user = this.mockUsers.find(u => u.id === userId);
+      if (user) {
+        user.blocked_until = null;
+        user.is_active = true;
+        user.updated_at = new Date().toISOString();
+      }
+      return of(new HttpResponse({
+        status: 200,
+        body: user ? { ...user } : { id: userId, blocked_until: null, is_active: true, updated_at: new Date().toISOString() }
+      })).pipe(delay(400));
+    }
     // 🎛️ Si mode production OU mock désactivé → passer à la vraie API
     if (environment.production || !environment.useMockData) {
       return next.handle(req);
@@ -22,38 +105,35 @@ export class MockInterceptor implements HttpInterceptor {
     // 🎭 MODE MOCK ACTIVÉ - Simuler des réponses
     console.log('🎭 MOCK MODE:', req.method, req.url);
 
-    const url = req.url;
-    const method = req.method;
-
-// 🔐 LOGIN - Activer la session mock
+    // 🔐 LOGIN - Activer la session mock
     if (url.includes('/auth/login') && method === 'POST') {
       const { email, password } = req.body;
-      
       if (email === 'admin@opossum.com' && password === 'admin') {
         // ✅ Activer la session mock
         this.mockSessionActive = true;
-    return of(new HttpResponse({
-      status: 200,
-      body: {
-        user: {
-          id: 1,
-          first_name: 'Admin',
-          last_name: 'Opossum',
-          email: 'admin@opossum.com',
-          role: UserRole.ADMIN,
-          password_hash: 'fake-hash-admin',
-          is_active: true,
-          is_email_verified: true,
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: new Date().toISOString(),
-          avatar: 'https://picsum.photos/150/150?random=admin',
-          phone: '+33123456789',
-          last_login_at: new Date().toISOString()
-        }
-        // ✅ Plus de access_token - géré par cookie !
-      }
-    })).pipe(delay(500));
-   } else {
+        this.mockSessionCookie = 'mock';
+        return of(new HttpResponse({
+          status: 200,
+          body: {
+            user: {
+              id: 1,
+              first_name: 'Admin',
+              last_name: 'Opossum',
+              email: 'admin@opossum.com',
+              role: UserRole.ADMIN,
+              password_hash: 'fake-hash-admin',
+              is_active: true,
+              is_email_verified: true,
+              created_at: '2024-01-01T00:00:00Z',
+              updated_at: new Date().toISOString(),
+              avatar: 'https://picsum.photos/150/150?random=admin',
+              phone: '+33123456789',
+              last_login_at: new Date().toISOString()
+            },
+            setCookie: 'session=mock; Path=/; HttpOnly'
+          }
+        })).pipe(delay(500));
+      } else {
         return of(new HttpResponse({
           status: 401,
           body: { message: 'Identifiants incorrects' }
@@ -65,17 +145,21 @@ export class MockInterceptor implements HttpInterceptor {
     if (url.includes('/auth/logout') && method === 'POST') {
       // ✅ Désactiver la session mock
       this.mockSessionActive = false;
-      
+      this.mockSessionCookie = '';
+      // Expire le cookie côté client
       return of(new HttpResponse({
         status: 200,
-        body: { message: 'Déconnecté avec succès' }
+        body: {
+          message: 'Déconnecté avec succès',
+          setCookie: 'session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        }
       })).pipe(delay(300));
     }
 
 // 🔍 AUTH/ME - Vérifier l'état de session
     if (url.includes('/auth/me') && method === 'GET') {
-      
-      if (this.mockSessionActive) {
+      // On vérifie la présence du cookie de session
+      if (this.mockSessionActive && hasMockSessionCookie) {
         // ✅ Session active - utilisateur connecté
         return of(new HttpResponse({
           status: 200,
@@ -113,85 +197,53 @@ export class MockInterceptor implements HttpInterceptor {
     if (url.includes('/users') && method === 'GET' && !url.includes('/users/')) {
       return of(new HttpResponse({
         status: 200,
-        body: [
-          {
-            id: 1,
-            first_name: 'Alice',
-            last_name: 'Martin',
-            email: 'alice@example.com',
-            role: UserRole.USER,
-            password_hash: 'hash1',
-            is_active: true,
-            is_email_verified: true,
-            created_at: '2025-01-15T10:00:00Z',
-            updated_at: '2025-07-20T15:30:00Z',
-            avatar: 'https://picsum.photos/100/100?random=1'
-          },
-          {
-            id: 2,
-            first_name: 'Bob',
-            last_name: 'Durand',
-            email: 'bob@example.com',
-            role: UserRole.USER,
-            password_hash: 'hash2',
-            is_active: true,
-            is_email_verified: false,
-            created_at: '2025-02-10T14:20:00Z',
-            updated_at: '2025-07-18T09:15:00Z'
-          },
-          {
-            id: 3,
-            first_name: 'Claire',
-            last_name: 'Lemoine',
-            email: 'claire@example.com',
-            role: UserRole.USER,
-            password_hash: 'hash3',
-            is_active: false,
-            is_email_verified: true,
-            created_at: '2025-03-05T16:45:00Z',
-            updated_at: '2025-07-15T11:20:00Z'
-          }
-        ]
+        body: this.mockUsers.map(u => ({
+          ...u,
+          blocked_until: u.blocked_until ?? null
+        }))
       })).pipe(delay(800));
     }
 
     // 👤 USER - GET BY ID
     if (url.match(/\/users\/\d+$/) && method === 'GET') {
       const userId = parseInt(url.split('/').pop() || '1');
-      return of(new HttpResponse({
-        status: 200,
-        body: {
-          id: userId,
-          first_name: `User`,
-          last_name: `#${userId}`,
-          email: `user${userId}@example.com`,
-          role: UserRole.USER,
-          password_hash: 'hash',
-          is_active: true,
-          is_email_verified: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      })).pipe(delay(400));
+      const user = this.mockUsers.find(u => u.id === userId);
+      if (user) {
+        return of(new HttpResponse({
+          status: 200,
+          body: {
+            ...user,
+            blocked_until: user.blocked_until ?? null
+          }
+        })).pipe(delay(400));
+      } else {
+        return of(new HttpResponse({
+          status: 404,
+          body: { message: 'Utilisateur non trouvé' }
+        })).pipe(delay(200));
+      }
     }
 
     // 👤 USER - CREATE
     if (url.includes('/users') && method === 'POST') {
       const userData = req.body;
+      const newUser = {
+        id: Math.floor(Math.random() * 1000) + 100,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        email: userData.email,
+        role: userData.role,
+        password_hash: 'fake-hash-' + Date.now(),
+        is_active: true,
+        is_email_verified: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        blocked_until: null
+      };
+      this.mockUsers.push(newUser);
       return of(new HttpResponse({
         status: 201,
-        body: {
-          id: Math.floor(Math.random() * 1000) + 100,
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          email: userData.email,
-          role: userData.role,
-          password_hash: 'fake-hash-' + Date.now(),
-          is_active: true,
-          is_email_verified: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
+        body: { ...newUser }
       })).pipe(delay(600));
     }
 
@@ -199,14 +251,23 @@ export class MockInterceptor implements HttpInterceptor {
     if (url.match(/\/users\/\d+$/) && method === 'PUT') {
       const userId = parseInt(url.split('/').pop() || '1');
       const userData = req.body;
-      return of(new HttpResponse({
-        status: 200,
-        body: {
-          id: userId,
-          ...userData,
-          updated_at: new Date().toISOString()
-        }
-      })).pipe(delay(500));
+      const user = this.mockUsers.find(u => u.id === userId);
+      if (user) {
+        Object.assign(user, userData);
+        user.updated_at = new Date().toISOString();
+        return of(new HttpResponse({
+          status: 200,
+          body: {
+            ...user,
+            blocked_until: user.blocked_until ?? null
+          }
+        })).pipe(delay(500));
+      } else {
+        return of(new HttpResponse({
+          status: 404,
+          body: { message: 'Utilisateur non trouvé' }
+        })).pipe(delay(200));
+      }
     }
 
     // 👤 USER - DELETE

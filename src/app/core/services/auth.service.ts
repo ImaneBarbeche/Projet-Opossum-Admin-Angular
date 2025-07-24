@@ -23,14 +23,18 @@ export class AuthService {
   // 🎯 LOGIN - Avec cookies automatiques
   login(email: string, password: string): Observable<AuthResponse> {
     const loginData: LoginRequest = { email, password };
-    
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, loginData, {
-      withCredentials: true // ← Les cookies sont gérés automatiquement
+      withCredentials: true
     }).pipe(
       tap(response => {
         // ✅ COOKIES ONLY - Pas de localStorage !
         this.currentUserSubject.next(response.user);
-        this.startTokenCheckInterval(); // Démarrer la vérification périodique
+        this.startTokenCheckInterval();
+        // 👇 Gestion du cookie mock si présent
+        if ((response as any).setCookie) {
+          document.cookie = (response as any).setCookie;
+          console.log('🍪 Cookie mock appliqué:', (response as any).setCookie);
+        }
         console.log('✅ Utilisateur connecté:', response.user.email);
       }),
       catchError(error => {
@@ -43,11 +47,15 @@ export class AuthService {
   // 🚪 LOGOUT - Appel API pour supprimer le cookie côté serveur
   logout(): void {
     console.log('🚪 Déconnexion en cours...');
-    
-    this.http.post(`${environment.apiUrl}/auth/logout`, {}, {
+    this.http.post<any>(`${environment.apiUrl}/auth/logout`, {}, {
       withCredentials: true
     }).subscribe({
-      next: () => {
+      next: (response) => {
+        // 👇 Gestion du cookie mock si présent
+        if (response && response.setCookie) {
+          document.cookie = response.setCookie;
+          console.log('🍪 Cookie mock supprimé:', response.setCookie);
+        }
         this.completeLogout();
       },
       error: (error) => {
