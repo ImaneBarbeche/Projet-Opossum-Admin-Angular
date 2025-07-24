@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,6 +32,11 @@ export class UserDetailComponent implements OnInit {
     private readonly router: Router,
     private readonly userService: UserService
   ) {}
+
+  // Vérifie si l'utilisateur est bloqué (helper)
+  isUserBlocked(): boolean {
+    return !!this.user?.blocked_until && new Date(this.user.blocked_until) > new Date();
+  }
 
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('id');
@@ -105,21 +111,35 @@ export class UserDetailComponent implements OnInit {
   toggleUserStatus(): void {
     if (!this.user) return;
 
+    if (this.isUserBlocked()) {
+      // Débloquer l'utilisateur avec prompt de confirmation
+      const confirmUnblock = confirm('Voulez-vous vraiment débloquer cet utilisateur ?');
+      if (!confirmUnblock) return;
+      this.userService.unblockUser(this.user.id).subscribe({
+        next: () => {
+          this.loadUser(this.user!.id);
+          alert('Utilisateur débloqué avec succès');
+        },
+        error: (error) => {
+          console.error('Erreur lors du déblocage:', error);
+          alert('Une erreur est survenue lors du déblocage');
+        }
+      });
+      return;
+    }
+
     if (this.user.is_active) {
       // Bloquer l'utilisateur - demander la durée
       const durationStr = prompt('Durée du blocage en jours (ex: 7, 30) :', '7');
       if (!durationStr) return;
-      
       const durationDays = parseInt(durationStr, 10);
       if (isNaN(durationDays) || durationDays <= 0) {
         alert('Veuillez entrer un nombre de jours valide');
         return;
       }
-
       if (confirm(`Bloquer cet utilisateur pendant ${durationDays} jours ?`)) {
         this.userService.blockUser(this.user.id, durationDays).subscribe({
           next: () => {
-            // Recharger les données utilisateur
             this.loadUser(this.user!.id);
             alert('Utilisateur bloqué avec succès');
           },
@@ -131,18 +151,17 @@ export class UserDetailComponent implements OnInit {
       }
       return;
     }
-    
-    // Débloquer l'utilisateur
-    if (confirm('Débloquer cet utilisateur ?')) {
-      this.userService.unblockUser(this.user.id).subscribe({
+
+    // Activer l'utilisateur (si inactif et non bloqué)
+    if (confirm('Activer cet utilisateur ?')) {
+      this.userService.updateUser(this.user.id, { is_active: true }).subscribe({
         next: () => {
-          // Recharger les données utilisateur
           this.loadUser(this.user!.id);
-          alert('Utilisateur débloqué avec succès');
+          alert('Utilisateur activé avec succès');
         },
         error: (error) => {
-          console.error('Erreur lors du déblocage:', error);
-          alert('Une erreur est survenue lors du déblocage');
+          console.error('Erreur lors de l\'activation:', error);
+          alert('Une erreur est survenue lors de l\'activation');
         }
       });
     }

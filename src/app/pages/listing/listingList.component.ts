@@ -17,7 +17,8 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './listingList.component.html',
-  styleUrl: './listingList.component.css'
+  styleUrls: ['./listingList.component.css']
+
 })
 export class ListingListComponent implements OnInit {
   

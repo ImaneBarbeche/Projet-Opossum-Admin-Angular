@@ -12,9 +12,15 @@
         {{ editMode ? 'Annuler' : 'Modifier' }}
       </button>
       @if (!editMode) {
-        <button class="action-btn warning" (click)="toggleUserStatus()">
-          {{ user?.is_active ? 'Suspendre' : 'Activer' }}
-        </button>
+        @if (isUserBlocked()) {
+          <button class="action-btn success" (click)="toggleUserStatus()">
+            Débloquer
+          </button>
+        } @else {
+          <button class="action-btn warning" (click)="toggleUserStatus()">
+            {{ user?.is_active ? 'Suspendre' : 'Activer' }}
+          </button>
+        }
         <button class="action-btn danger" (click)="deleteUser()">
           Supprimer
         </button>
