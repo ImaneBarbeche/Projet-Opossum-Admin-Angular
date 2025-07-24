@@ -34,15 +34,35 @@ export class UserService {
     return this.http.delete<void>(`${environment.apiUrl}/users/${id}`);
   }
 
-  // 🚫 Bloquer un utilisateur
-  blockUser(userId: string): Observable<User> {
-    const id = parseInt(userId);
-    return this.updateUser(id, { is_active: false });
+  // 🚫 Bloquer un utilisateur - CORRIGÉ
+  blockUser(userId: number, durationDays: number): Observable<void> {
+    const blockedUntil = new Date();
+    blockedUntil.setDate(blockedUntil.getDate() + durationDays);
+    
+    // ✅ CORRECTION : Utiliser environment.apiUrl au lieu de this.apiUrl
+    return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/block`, {
+      blocked_until: blockedUntil.toISOString()
+    });
   }
 
-  // ✅ Débloquer un utilisateur
-  unblockUser(userId: string): Observable<User> {
-    const id = parseInt(userId);
-    return this.updateUser(id, { is_active: true });
+  // ✅ Débloquer un utilisateur - CORRIGÉ
+  unblockUser(userId: number): Observable<void> {
+    // ✅ CORRECTION : Utiliser environment.apiUrl au lieu de this.apiUrl
+    return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/unblock`, {});
+  }
+
+  // ✅ Helper pour vérifier si un user est bloqué
+  // ✅ Helper pour vérifier si un user est bloqué
+  isUserBlocked(user: User): boolean {
+    // Suppose a user is blocked if blocked_until exists and is in the future
+    return !!user.blocked_until && new Date(user.blocked_until) > new Date();
+  }
+
+  // ✅ Helper pour l'affichage du statut de blocage
+  getUserBlockedStatus(user: User): string {
+    if (this.isUserBlocked(user)) {
+      return `Bloqué jusqu'au ${new Date(user.blocked_until!).toLocaleString()}`;
+    }
+    return 'Actif';
   }
 }

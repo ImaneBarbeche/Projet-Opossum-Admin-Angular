@@ -13,13 +13,13 @@ import {
 } from '../../core/models/listing.model';
 
 @Component({
-  selector: 'app-listingList',
+  selector: 'app-listing-list',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './listingList.component.html',
   styleUrl: './listingList.component.css'
 })
-export class AnnonceListComponent implements OnInit {
+export class ListingListComponent implements OnInit {
   
 
   private readonly listingService = inject(ListingService);
@@ -74,7 +74,9 @@ export class AnnonceListComponent implements OnInit {
       status: this.selectedStatus() !== 'ALL' ? this.selectedStatus() as ListingStatus : undefined,
       type: this.selectedType() !== 'ALL' ? this.selectedType() as ListingType : undefined,
       category: this.selectedCategory() !== 'ALL' ? this.selectedCategory() as ListingCategory : undefined,
-      search: this.searchTerm() || undefined
+      search: this.searchTerm() || undefined,
+      includeArchived: this.includeArchived(),
+      includeDeleted: this.includeDeleted()
     };
 
     this.listingService.getAllListings(filters).subscribe({
@@ -176,6 +178,21 @@ export class AnnonceListComponent implements OnInit {
       case ListingCategory.PETS: return '🐕';
       case ListingCategory.OTHER: return '📦';
       default: return '❓';
+    }
+  }
+
+  getCategoryLabel(category: ListingCategory): string {
+    switch (category) {
+      case ListingCategory.ELECTRONICS: return 'Électronique';
+      case ListingCategory.CLOTHING: return 'Vêtements';
+      case ListingCategory.ACCESSORIES: return 'Accessoires';
+      case ListingCategory.DOCUMENTS: return 'Documents';
+      case ListingCategory.KEYS: return 'Clés';
+      case ListingCategory.BAGS: return 'Sacs';
+      case ListingCategory.JEWELRY: return 'Bijoux';
+      case ListingCategory.PETS: return 'Animaux';
+      case ListingCategory.OTHER: return 'Autre';
+      default: return 'Inconnu';
     }
   }
 

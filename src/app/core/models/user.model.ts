@@ -4,29 +4,24 @@
 // 👤 Interface principale représentant un utilisateur dans le système
 // ===============================================================
 export interface User {
-  isBlocked: any;
-  // === Champs obligatoires ===
-
-  id: number; // Identifiant unique de l'utilisateur (généré par la base)
-  first_name: string; // Prénom
-  last_name: string;  // Nom de famille
-  email: string;      // Adresse email (sert d’identifiant à la connexion)
-  password_hash: string; // Mot de passe crypté (jamais en clair !)
-  role: UserRole;     // Rôle de l’utilisateur (admin, modérateur, user)
-  is_active: boolean; // L’utilisateur est-il actif ? (sinon, compte désactivé)
-  is_email_verified: boolean; // L’adresse mail a-t-elle été confirmée ?
-  created_at: Date;   // Date de création du compte
-  updated_at: Date;   // Dernière modification du profil
-
-  // === Champs optionnels ===
-
-  avatar?: string; // URL de l'image de profil (facultatif)
-  phone?: string;  // Numéro de téléphone
-  last_login_at?: Date; // Dernière connexion connue
-  email_verification_token?: string; // Jeton de confirmation d’email
-  email_verification_expires_at?: Date; // Expiration du lien de confirmation
-  password_reset_token?: string; // Jeton pour réinitialiser le mot de passe
-  password_reset_expires_at?: Date; // Expiration du lien de réinitialisation
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  avatar?: string;
+  role: string;
+  is_active: boolean;
+  is_email_verified: boolean;
+  blocked_until?: Date | null;  
+  status?: string;             
+  created_at: Date;
+  updated_at: Date;
+  last_login_at?: Date;
+  email_verification_token?: string;
+  email_verification_expires_at?: Date;
+  password_reset_token?: string;
+  password_reset_expires_at?: Date;
 }
 
 // ===============================================================
@@ -80,4 +75,23 @@ export interface AuthResponse {
   access_token: string;   // JWT pour accéder aux routes sécurisées
   refresh_token: string;  // Jeton pour régénérer un access token expiré
   expires_in: number;     // Durée de validité du access_token (en secondes)
+}
+
+export class UserHelpers {
+  static isBlocked(user: User): boolean {
+    if (!user.blocked_until) return false;
+    return new Date() < new Date(user.blocked_until);
+  }
+  
+  static getBlockedStatus(user: User): string {
+    if (!user.blocked_until) return 'Non bloqué';
+    
+    const blockedUntil = new Date(user.blocked_until);
+    const now = new Date();
+    
+    if (blockedUntil <= now) return 'Blocage expiré';
+    
+    const diffDays = Math.ceil((blockedUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return `Bloqué encore ${diffDays} jour(s)`;
+  }
 }

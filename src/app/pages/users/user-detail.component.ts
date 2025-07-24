@@ -105,15 +105,44 @@ export class UserDetailComponent implements OnInit {
   toggleUserStatus(): void {
     if (!this.user) return;
 
-    const action = this.user.is_active ? 'bloquer' : 'activer';
-    if (confirm(`Êtes-vous sûr de vouloir ${action} cet utilisateur ?`)) {
-      this.userService.blockUser(this.user.id.toString()).subscribe({
-        next: (updatedUser) => {
-          this.user = updatedUser;
+    if (this.user.is_active) {
+      // Bloquer l'utilisateur - demander la durée
+      const durationStr = prompt('Durée du blocage en jours (ex: 7, 30) :', '7');
+      if (!durationStr) return;
+      
+      const durationDays = parseInt(durationStr, 10);
+      if (isNaN(durationDays) || durationDays <= 0) {
+        alert('Veuillez entrer un nombre de jours valide');
+        return;
+      }
+
+      if (confirm(`Bloquer cet utilisateur pendant ${durationDays} jours ?`)) {
+        this.userService.blockUser(this.user.id, durationDays).subscribe({
+          next: () => {
+            // Recharger les données utilisateur
+            this.loadUser(this.user!.id);
+            alert('Utilisateur bloqué avec succès');
+          },
+          error: (error) => {
+            console.error('Erreur lors du blocage:', error);
+            alert('Une erreur est survenue lors du blocage');
+          }
+        });
+      }
+      return;
+    }
+    
+    // Débloquer l'utilisateur
+    if (confirm('Débloquer cet utilisateur ?')) {
+      this.userService.unblockUser(this.user.id).subscribe({
+        next: () => {
+          // Recharger les données utilisateur
+          this.loadUser(this.user!.id);
+          alert('Utilisateur débloqué avec succès');
         },
         error: (error) => {
-          console.error('Erreur lors de la modification du statut:', error);
-          alert('Une erreur est survenue lors de la modification du statut');
+          console.error('Erreur lors du déblocage:', error);
+          alert('Une erreur est survenue lors du déblocage');
         }
       });
     }

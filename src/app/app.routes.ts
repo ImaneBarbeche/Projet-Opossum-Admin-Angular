@@ -3,7 +3,7 @@ import { LoginComponent } from './pages/auth/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { UserListComponent } from './pages/users/user-list.component';
 import { UserDetailComponent } from './pages/users/user-detail.component';
-import { ListingListComponent } from './pages/annonces/listingListcomponent';
+import { ListingListComponent } from './pages/listing/listingList.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [

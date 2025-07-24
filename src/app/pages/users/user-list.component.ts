@@ -119,7 +119,13 @@ export class UserListComponent implements OnInit {
 
   blockUser(userId: string): void {
     if (confirm('Êtes-vous sûr de vouloir bloquer cet utilisateur ?')) {
-      this.userService.blockUser(userId).subscribe({
+      const durationStr = prompt('Durée du blocage en jours ?', '7');
+      const durationDays = durationStr ? parseInt(durationStr, 10) : 7;
+      if (isNaN(durationDays) || durationDays <= 0) {
+        alert('Veuillez entrer une durée valide (nombre de jours).');
+        return;
+      }
+      this.userService.blockUser(parseInt(userId, 10), durationDays).subscribe({
         next: () => {
           this.loadUsers();
         },
@@ -131,7 +137,7 @@ export class UserListComponent implements OnInit {
   }
 
   unblockUser(userId: string): void {
-    this.userService.unblockUser(userId).subscribe({
+    this.userService.unblockUser(parseInt(userId, 10)).subscribe({
       next: () => {
         this.loadUsers();
       },

@@ -30,21 +30,22 @@ export interface Listing {
   id: number;
   title: string;
   description: string;
-  type: ListingType;
-  category: ListingCategory;
-  status: ListingStatus;
   user_id: number;
   address: string;
   city: string;
-  contact_email: string;
-  contact_phone?: string;
   latitude?: number;
   longitude?: number;
+  contact_email: string;
+  contact_phone?: string;
   photo_url?: string;
+  category: ListingCategory;  
+  type: ListingType;
+  status: ListingStatus;
+  is_lost: boolean;
+  resolved_at?: Date;
   created_at: Date;
   updated_at: Date;
-  resolved_at?: Date;
-  is_lost: boolean; // Correspond à votre colonne BDD
+  
 }
 
 // Interface pour les filtres

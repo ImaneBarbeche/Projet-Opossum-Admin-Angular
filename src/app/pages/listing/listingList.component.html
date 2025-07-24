@@ -4,6 +4,22 @@
   <div class="page-header">
     <div class="header-content">
       <h1 class="page-title">📦 Gestion des Annonces</h1>
+      
+      <!-- Indicateurs de filtres actifs -->
+      @if (isAdmin() && (includeArchived() || includeDeleted())) {
+        <div class="active-filters-info">
+          <small class="filter-indicator">
+            🔍 Filtres actifs: 
+            @if (includeArchived()) {
+              <span class="filter-tag">📦 Archivées</span>
+            }
+            @if (includeDeleted()) {
+              <span class="filter-tag">🗑️ Supprimées</span>
+            }
+          </small>
+        </div>
+      }
+      
       <div class="stats-summary">
         <div class="stat-item">
           <span class="stat-number">{{ stats().total }}</span>
@@ -18,11 +34,11 @@
           <span class="stat-label">Résolues</span>
         </div>
         @if (isAdmin()) {
-          <div class="stat-item">
+          <div class="stat-item" [class.highlighted]="includeArchived()">
             <span class="stat-number">{{ stats().archived }}</span>
             <span class="stat-label">Archivées</span>
           </div>
-          <div class="stat-item">
+          <div class="stat-item" [class.highlighted]="includeDeleted()">
             <span class="stat-number">{{ stats().deleted }}</span>
             <span class="stat-label">Supprimées</span>
           </div>
@@ -37,8 +53,9 @@
       
       <!-- Recherche -->
       <div class="filter-group">
-        <label class="filter-label">Recherche</label>
+        <label class="filter-label" for="search-input">Recherche</label>
         <input
+          id="search-input"
           type="text"
           class="filter-input"
           placeholder="Titre, description..."
@@ -49,8 +66,9 @@
 
       <!-- Statut - RESPECTE LES RÈGLES : PAS D'ARCHIVED EN SÉLECTION -->
       <div class="filter-group">
-        <label class="filter-label">Statut</label>
+        <label class="filter-label" for="status-select">Statut</label>
         <select
+          id="status-select"
           class="filter-select"
           [value]="selectedStatus()"
           (change)="onStatusChange($event)"
@@ -69,8 +87,9 @@
 
       <!-- Type -->
       <div class="filter-group">
-        <label class="filter-label">Type</label>
+        <label class="filter-label" for="type-select">Type</label>
         <select
+          id="type-select"
           class="filter-select"
           [value]="selectedType()"
           (change)="onTypeChange($event)"
@@ -83,8 +102,9 @@
 
       <!-- Catégories -->
       <div class="filter-group">
-        <label class="filter-label">Catégorie</label>
+        <label class="filter-label" for="category-select">Catégorie</label>
         <select
+          id="category-select"
           class="filter-select"
           [value]="selectedCategory()"
           (change)="onCategoryChange($event)"
@@ -104,6 +124,26 @@
 
       <!-- Actions -->
       <div class="filter-actions">
+        <!-- Filtres spéciaux admin pour voir les contenus cachés -->
+        @if (isAdmin()) {
+          <div class="admin-filters">
+            <button 
+              class="btn btn-toggle"
+              [class.active]="includeArchived()"
+              (click)="toggleArchived()"
+              title="Inclure les annonces archivées dans les résultats">
+              📦 {{ includeArchived() ? 'Masquer' : 'Voir' }} archivées
+            </button>
+            <button 
+              class="btn btn-toggle"
+              [class.active]="includeDeleted()"
+              (click)="toggleDeleted()"
+              title="Inclure les annonces supprimées dans les résultats">
+              🗑️ {{ includeDeleted() ? 'Masquer' : 'Voir' }} supprimées
+            </button>
+          </div>
+        }
+        
         <button class="btn btn-secondary" (click)="resetFilters()">
           🔄 Reset
         </button>
@@ -153,7 +193,7 @@
               </span>
               
               <span class="category-badge">
-                {{ getCategoryIcon(listing.category) }} {{ listing.category }}
+                {{ getCategoryIcon(listing.category) }} {{ getCategoryLabel(listing.category) }}
               </span>
             </div>
             
@@ -303,6 +343,12 @@
               Aucune annonce archivée trouvée.
             } @else if (selectedStatus() === 'DELETED') {
               Aucune annonce supprimée trouvée.
+            } @else if (includeArchived() && includeDeleted()) {
+              Aucune annonce ne correspond aux critères de recherche (y compris archivées et supprimées).
+            } @else if (includeArchived()) {
+              Aucune annonce ne correspond aux critères de recherche (y compris archivées).
+            } @else if (includeDeleted()) {
+              Aucune annonce ne correspond aux critères de recherche (y compris supprimées).
             } @else {
               Aucune annonce ne correspond aux critères de recherche.
             }
