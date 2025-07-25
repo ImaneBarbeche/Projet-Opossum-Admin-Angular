@@ -89,7 +89,7 @@ export class AuthService {
     }
   }
 
-  // 🔍 VÉRIFICATION - Basée sur l'appel /auth/me avec cookies
+  // 🔍 VÉRIFICATION - Basée sur l'appel /auth avec cookies
   isAuthenticated(): boolean {
     return this.currentUserSubject.value !== null;
   }
