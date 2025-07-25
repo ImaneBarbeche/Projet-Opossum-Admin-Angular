@@ -78,7 +78,7 @@ export class AuthService {
     }
   }
 
-  // 🔍 VÉRIFICATION - Basée sur l'appel /auth/me avec cookies
+  // 🔍 VÉRIFICATION - Basée sur l'appel /auth avec cookies
   isAuthenticated(): boolean {
     return this.currentUserSubject.value !== null;
   }
@@ -92,7 +92,7 @@ export class AuthService {
   initializeAuth(): void {
     console.log('🔄 Initialisation de l\'authentification via cookies...');
     
-    this.http.get<{user: User, authenticated: boolean}>(`${environment.apiUrl}/auth/me`, {
+    this.http.get<{user: User, authenticated: boolean}>(`${environment.apiUrl}/auth`, {
       withCredentials: true // ← Le cookie sera envoyé automatiquement
     }).subscribe({
       next: (response) => {

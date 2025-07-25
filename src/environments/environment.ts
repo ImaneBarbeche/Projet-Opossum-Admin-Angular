@@ -6,6 +6,6 @@
 
 export const environment = {
   production: true,
-  apiUrl: 'https://localhost:4200/api',  // URL production Railway
+  apiUrl: 'http://localhost:8080/api',  // URL production Railway
   useMockData: false 
 };
