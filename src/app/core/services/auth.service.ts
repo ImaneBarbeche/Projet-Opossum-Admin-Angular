@@ -14,6 +14,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private tokenCheckInterval?: number;
+  private accessToken: string | null = null;
 
   constructor() {
     // 🔍 Vérifier au démarrage si l'utilisateur est connecté VIA COOKIES
@@ -28,14 +29,24 @@ export class AuthService {
     }).pipe(
       tap(response => {
         // ✅ COOKIES ONLY - Pas de localStorage !
-        this.currentUserSubject.next(response.user);
-        this.startTokenCheckInterval();
-        // 👇 Gestion du cookie mock si présent
-        if ((response as any).setCookie) {
-          document.cookie = (response as any).setCookie;
-          console.log('🍪 Cookie mock appliqué:', (response as any).setCookie);
+        const user = (response as any).user || (response as any).data;
+        if (user) {
+          this.currentUserSubject.next(user);
+          this.startTokenCheckInterval();
+          // 👇 Gestion du cookie mock si présent
+          if ((response as any).setCookie) {
+            document.cookie = (response as any).setCookie;
+            console.log('🍪 Cookie mock appliqué:', (response as any).setCookie);
+          }
+          // 🔑 Stocker le JWT accessToken si présent
+          if ((response as any).accessToken) {
+            this.accessToken = (response as any).accessToken;
+            console.log('🔑 accessToken reçu et stocké:', this.accessToken);
+          }
+          console.log('✅ Utilisateur connecté:', user.email);
+        } else {
+          console.log('❌ Réponse login sans user:', response);
         }
-        console.log('✅ Utilisateur connecté:', response.user.email);
       }),
       catchError(error => {
         console.error('❌ Erreur de connexion:', error);
@@ -92,7 +103,7 @@ export class AuthService {
   initializeAuth(): void {
     console.log('🔄 Initialisation de l\'authentification via cookies...');
     
-    this.http.get<{user: User, authenticated: boolean}>(`${environment.apiUrl}/auth/me`, {
+    this.http.get<{user: User, authenticated: boolean}>(`${environment.apiUrl}/auth`, {
       withCredentials: true // ← Le cookie sera envoyé automatiquement
     }).subscribe({
       next: (response) => {
@@ -192,6 +203,11 @@ export class AuthService {
     
 
     return false;
+  }
+
+  // Récupérer le JWT accessToken
+  public getAccessToken(): string | null {
+    return this.accessToken;
   }
 
 }
