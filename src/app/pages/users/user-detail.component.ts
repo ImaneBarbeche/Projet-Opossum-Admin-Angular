@@ -23,8 +23,8 @@ interface Activity {
 export class UserDetailComponent implements OnInit {
   user: User | null = null;
   loading = true;
-  editMode = false;
-  editForm: Partial<User> = {};
+  // editMode = false;
+  // editForm: Partial<User> = {};
   recentActivity: Activity[] = [];
 
   constructor(
@@ -33,9 +33,17 @@ export class UserDetailComponent implements OnInit {
     private readonly userService: UserService
   ) {}
 
-  // Vérifie si l'utilisateur est bloqué (helper)
+  // Vérifie si l'utilisateur est bloqué (nouvelle logique harmonisée)
   isUserBlocked(): boolean {
-    return !!this.user?.blockedUntil && new Date(this.user.blockedUntil!) > new Date();
+    if (!this.user) return false;
+    if (this.user.status === 'BLOCKED') {
+      const unblockDate = this.user.unblockAt || this.user.blockedUntil;
+      if (unblockDate) {
+        return new Date(unblockDate) > new Date();
+      }
+      return true; // Blocage permanent si pas de date
+    }
+    return false;
   }
 
   ngOnInit(): void {
@@ -51,9 +59,14 @@ export class UserDetailComponent implements OnInit {
     this.loading = true;
     this.userService.getUserById(id).subscribe({
       next: (user) => {
-        console.log('[UserDetailComponent] user reçu', user); // DEBUG
+        console.log('[UserDetailComponent] user reçu', user);
+        console.log('[UserDetailComponent] Champs:',
+          'active:', user.active,
+          'status:', user.status,
+          'unblockAt:', user.unblockAt,
+          'blockedUntil:', user.blockedUntil
+        );
         this.user = user;
-        this.initEditForm();
         this.loadRecentActivity();
         this.loading = false;
       },
@@ -75,16 +88,7 @@ export class UserDetailComponent implements OnInit {
     });
   }
 
-  initEditForm(): void {
-    if (this.user) {
-      this.editForm = {
-        firstName: this.user.firstName,
-        lastName: this.user.lastName,
-        email: this.user.email,
-        role: this.user.role
-      };
-    }
-  }
+
 
   loadRecentActivity(): void {
     // Simulation d'activité récente (à remplacer par un appel API)
@@ -183,20 +187,7 @@ export class UserDetailComponent implements OnInit {
       return;
     }
 
-    // Activer l'utilisateur (si inactif et non bloqué)
-    if (confirm('Activer cet utilisateur ?')) {
-      // Endpoint: PATCH /api/v1/admin/users/:id
-      this.userService.updateUser(this.user.id, { active: true }).subscribe({
-        next: () => {
-          this.loadUser(String(this.user!.id));
-          alert('Utilisateur activé avec succès');
-        },
-        error: (error) => {
-          console.error('Erreur lors de l\'activation:', error);
-          alert('Une erreur est survenue lors de l\'activation');
-        }
-      });
-    }
+
   }
 
   deleteUser(): void {
@@ -217,37 +208,9 @@ export class UserDetailComponent implements OnInit {
     }
   }
 
-  saveUser(): void {
-    if (!this.user || !this.editForm.firstName || !this.editForm.lastName || !this.editForm.email) {
-      alert('Veuillez remplir tous les champs obligatoires');
-      return;
-    }
 
-    const userData: Partial<User> = {
-      firstName: this.editForm.firstName,
-      lastName: this.editForm.lastName,
-      email: this.editForm.email,
-      role: this.editForm.role || this.user.role
-    };
 
-    // Endpoint: PATCH /api/v1/admin/users/:id
-    this.userService.updateUser(this.user.id, userData).subscribe({
-      next: (user) => {
-        this.user = user;
-        this.editMode = false;
-        alert('Utilisateur mis à jour avec succès');
-      },
-      error: (error) => {
-        console.error('Erreur lors de la mise à jour:', error);
-        alert('Une erreur est survenue lors de la mise à jour');
-      }
-    });
-  }
 
-  cancelEdit(): void {
-    this.editMode = false;
-    this.initEditForm();
-  }
 
   formatDate(date: string | Date | null | undefined): string {
     if (!date) return 'Non disponible';

@@ -41,19 +41,7 @@ export class UserService {
     );
   }
 
-  // ✨ Créer un utilisateur
-  createUser(userData: CreateUserRequest): Observable<User> {
-    return this.http.post<User>(`${environment.apiUrl}/admin/users`, userData, {
-      withCredentials: true
-    });
-  }
 
-  // ✏️ Modifier un utilisateur (admin)
-  updateUser(id: string, userData: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${environment.apiUrl}/admin/users/${id}`, userData, {
-      withCredentials: true
-    });
-  }
 
   // 🗑️ Supprimer un utilisateur (admin)
   deleteUser(id: string): Observable<void> {

@@ -8,23 +8,18 @@
     </button>
     
     <div class="header-actions">
-      <button class="action-btn primary" (click)="editMode = !editMode">
-        {{ editMode ? 'Annuler' : 'Modifier' }}
-      </button>
-      @if (!editMode) {
-        @if (isUserBlocked()) {
-          <button class="action-btn success" (click)="toggleUserStatus()">
-            Débloquer
-          </button>
-        } @else {
-          <button class="action-btn warning" (click)="toggleUserStatus()">
-            {{ user?.active ? 'Suspendre' : 'Activer' }}
-          </button>
-        }
-        <button class="action-btn danger" (click)="deleteUser()">
-          Supprimer
+      @if (isUserBlocked()) {
+        <button class="action-btn success" (click)="toggleUserStatus()">
+          Débloquer
+        </button>
+      } @else {
+        <button class="action-btn warning" (click)="toggleUserStatus()">
+          Suspendre
         </button>
       }
+      <button class="action-btn danger" (click)="deleteUser()">
+        Supprimer
+      </button>
     </div>
   </div>
 
@@ -43,75 +38,33 @@
           <div class="status-badge" [class.active]="user.active">
             @if (isUserBlocked()) {
               🚫 Bloqué
-              @if (user.blockedUntil) {
-                jusqu'au {{ formatDate(user.blockedUntil) }}
+              @if (user.unblockAt || user.blockedUntil) {
+                jusqu'au {{ formatDate(user.unblockAt || user.blockedUntil) }}
               }
               @if (user.blockReason) {
                 <span class="block-reason">— Motif : {{ user.blockReason }}</span>
               }
             } @else {
-              {{ user.active ? '✅ Actif' : '⏸️ Inactif' }}
+              @if (user.active !== undefined) {
+                {{ user.active ? '✅ Actif' : '⏸️ Inactif' }}
+              } @else {
+                @if (user.status === 'ACTIVE') {
+                  ✅ Actif
+                } @else {
+                  ⏸️ Inactif
+                }
+              }
+            }
+            @if (user.emailVerified) {
+              <span class="status-badge verified">📧 Email vérifié</span>
             }
           </div>
         </div>
         
         <div class="user-info">
-          @if (!editMode) {
-            <h1 class="user-name">{{ user.firstName }} {{ user.lastName }}</h1>
-            <p class="user-email">{{ user.email }}</p>
-            <p class="user-role">{{ getRoleDisplay(user.role) }}</p>
-          } @else {
-            <div class="edit-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="first-name-input">Prénom</label>
-                  <input 
-                    id="first-name-input"
-                    type="text" 
-                    [(ngModel)]="editForm.firstName"
-                    class="form-input"
-                    placeholder="Prénom">
-                </div>
-                <div class="form-group">
-                  <label for="last-name-input">Nom</label>
-                  <input 
-                    id="last-name-input"
-                    type="text" 
-                    [(ngModel)]="editForm.lastName"
-                    class="form-input"
-                    placeholder="Nom">
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <label for="email-input">Email</label>
-                <input 
-                  id="email-input"
-                  type="email" 
-                  [(ngModel)]="editForm.email"
-                  class="form-input"
-                  placeholder="Email">
-              </div>
-              
-              <div class="form-group">
-                <label for="role-select">Rôle</label>
-                <select id="role-select" [(ngModel)]="editForm.role" class="form-select">
-                  <option value="user">Utilisateur</option>
-                  <option value="admin">Administrateur</option>
-                  <option value="moderator">Modérateur</option>
-                </select>
-              </div>
-              
-              <div class="form-actions">
-                <button class="action-btn success" (click)="saveUser()">
-                  Enregistrer
-                </button>
-                <button class="action-btn secondary" (click)="cancelEdit()">
-                  Annuler
-                </button>
-              </div>
-            </div>
-          }
+          <h1 class="user-name">{{ user.firstName }} {{ user.lastName }}</h1>
+          <p class="user-email">{{ user.email }}</p>
+          <p class="user-role">{{ getRoleDisplay(user.role) }}</p>
         </div>
       </div>
     </div>
@@ -124,23 +77,23 @@
         <div class="info-list">
           <div class="info-item">
             <span class="info-label">ID utilisateur</span>
-            <span class="info-value">{{ user.id }}</span>
+            <span class="info-value">{{ user?.id }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Nom</span>
-            <span class="info-value">{{ user.lastName }}</span>
+            <span class="info-value">{{ user?.lastName }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Prénom</span>
-            <span class="info-value">{{ user.firstName }}</span>
+            <span class="info-value">{{ user?.firstName }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Date d'inscription</span>
-            <span class="info-value">{{ formatDate(user.createdAt) }}</span>
+            <span class="info-value">{{ formatDate(user?.createdAt) }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Photo de profil</span>
-            @if (user.avatar) {
+            @if (user?.avatar) {
               <img [src]="user.avatar" alt="Avatar" class="user-avatar" />
             } @else {
               <span class="info-value">Aucune photo</span>
@@ -166,7 +119,7 @@
             <div class="stat-label">Messages envoyés</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">{{ calculateTrustScore(user) }}%</div>
+            <div class="stat-value">{{ calculateTrustScore(user!) }}%</div>
             <div class="stat-label">Score de confiance</div>
           </div>
         </div>
