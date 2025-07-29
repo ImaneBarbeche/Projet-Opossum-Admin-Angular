@@ -22,6 +22,9 @@ export interface User {
   createdAt: string;  // ✅ Utilise createdAt et string pour ISO dates
   updatedAt: string;  // ✅ Utilise updatedAt et string pour ISO dates
   lastLoginAt?: string | null;  // ✅ Utilise lastLoginAt et string pour ISO dates
+  recentActivity?: Array<{ type: string; label: string; date: string }>;
+  announcementsCount?: number;
+  activeAnnouncementsCount?: number;
   
   // Propriétés optionnelles pour l'admin (pas dans l'API)
   email_verification_token?: string;
@@ -111,6 +114,9 @@ export class UserHelpers {
       createdAt: source.created_at ?? source.createdAt,
       updatedAt: source.updated_at ?? source.updatedAt,
       lastLoginAt: source.last_login_at ?? source.lastLoginAt,
+      announcementsCount: source.announcementsCount,
+      activeAnnouncementsCount: source.activeAnnouncementsCount,
+      recentActivity: source.recentActivity,
       // autres propriétés si besoin
     } as User;
   }

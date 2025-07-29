@@ -77,23 +77,23 @@
         <div class="info-list">
           <div class="info-item">
             <span class="info-label">ID utilisateur</span>
-            <span class="info-value">{{ user?.id }}</span>
+            <span class="info-value">{{ user.id }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Nom</span>
-            <span class="info-value">{{ user?.lastName }}</span>
+            <span class="info-value">{{ user.lastName }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Prénom</span>
-            <span class="info-value">{{ user?.firstName }}</span>
+            <span class="info-value">{{ user.firstName }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Date d'inscription</span>
-            <span class="info-value">{{ formatDate(user?.createdAt) }}</span>
+            <span class="info-value">{{ formatDate(user.createdAt) }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Photo de profil</span>
-            @if (user?.avatar) {
+            @if (user.avatar) {
               <img [src]="user.avatar" alt="Avatar" class="user-avatar" />
             } @else {
               <span class="info-value">Aucune photo</span>
@@ -107,11 +107,11 @@
         <h3 class="card-title">📊 Statistiques</h3>
         <div class="stats-grid">
           <div class="stat-item">
-            <div class="stat-value">0</div>
+            <div class="stat-value">{{ user.announcementsCount ?? 0 }}</div>
             <div class="stat-label">Annonces publiées</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">0</div>
+            <div class="stat-value">{{ user.activeAnnouncementsCount ?? 0 }}</div>
             <div class="stat-label">Annonces actives</div>
           </div>
           <div class="stat-item">

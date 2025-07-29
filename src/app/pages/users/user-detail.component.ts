@@ -67,7 +67,17 @@ export class UserDetailComponent implements OnInit {
           'blockedUntil:', user.blockedUntil
         );
         this.user = user;
-        this.loadRecentActivity();
+        // Charger l'activité réelle si présente dans la réponse
+        if (user.recentActivity && Array.isArray(user.recentActivity)) {
+          this.recentActivity = user.recentActivity.map((a: any, idx: number) => ({
+            id: idx + 1,
+            type: a.type,
+            description: a.label,
+            date: a.date
+          }));
+        } else {
+          this.recentActivity = [];
+        }
         this.loading = false;
       },
       error: (error) => {
@@ -90,35 +100,7 @@ export class UserDetailComponent implements OnInit {
 
 
 
-  loadRecentActivity(): void {
-    // Simulation d'activité récente (à remplacer par un appel API)
-    this.recentActivity = [
-      {
-        id: 1,
-        type: 'login',
-        description: 'Connexion à l\'application',
-        date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 2,
-        type: 'ad_created',
-        description: 'Nouvelle annonce "iPhone 13 Pro"',
-        date: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 3,
-        type: 'message',
-        description: 'Message envoyé à un vendeur',
-        date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 4,
-        type: 'profile_updated',
-        description: 'Profil mis à jour',
-        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    ];
-  }
+
 
   goBack(): void {
     this.router.navigate(['/users']);
