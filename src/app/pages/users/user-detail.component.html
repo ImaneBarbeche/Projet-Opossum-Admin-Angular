@@ -18,7 +18,7 @@
           </button>
         } @else {
           <button class="action-btn warning" (click)="toggleUserStatus()">
-            {{ user?.is_active ? 'Suspendre' : 'Activer' }}
+            {{ user?.active ? 'Suspendre' : 'Activer' }}
           </button>
         }
         <button class="action-btn danger" (click)="deleteUser()">
@@ -38,16 +38,16 @@
       <div class="profile-header">
         <div class="avatar-section">
           <div class="user-avatar">
-            {{ user.first_name[0] }}{{ user.last_name[0] }}
+            {{ user.firstName[0] }}{{ user.lastName[0] }}
           </div>
-          <div class="status-badge" [class.active]="user.is_active">
-            {{ user.is_active ? 'Actif' : 'Inactif' }}
+          <div class="status-badge" [class.active]="user.active">
+            {{ user.active ? 'Actif' : 'Inactif' }}
           </div>
         </div>
         
         <div class="user-info">
           @if (!editMode) {
-            <h1 class="user-name">{{ user.first_name }} {{ user.last_name }}</h1>
+            <h1 class="user-name">{{ user.firstName }} {{ user.lastName }}</h1>
             <p class="user-email">{{ user.email }}</p>
             <p class="user-role">{{ getRoleDisplay(user.role) }}</p>
           } @else {
@@ -58,7 +58,7 @@
                   <input 
                     id="first-name-input"
                     type="text" 
-                    [(ngModel)]="editForm.first_name"
+                    [(ngModel)]="editForm.firstName"
                     class="form-input"
                     placeholder="Prénom">
                 </div>
@@ -67,7 +67,7 @@
                   <input 
                     id="last-name-input"
                     type="text" 
-                    [(ngModel)]="editForm.last_name"
+                    [(ngModel)]="editForm.lastName"
                     class="form-input"
                     placeholder="Nom">
                 </div>
@@ -122,16 +122,16 @@
           </div>
           <div class="info-item">
             <span class="info-label">Date d'inscription</span>
-            <span class="info-value">{{ formatDate(user.created_at) }}</span>
+            <span class="info-value">{{ formatDate(user.createdAt) }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Dernière connexion</span>
-            <span class="info-value">{{ formatDate(user.last_login_at) }}</span>
+            <span class="info-value">{{ formatDate(user.lastLoginAt) }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Email vérifié</span>
-            <span class="info-value" [class.verified]="user.is_email_verified">
-              {{ user.is_email_verified ? 'Oui' : 'Non' }}
+            <span class="info-value" [class.verified]="user.emailVerified">
+              {{ user.emailVerified ? 'Oui' : 'Non' }}
             </span>
           </div>
         </div>

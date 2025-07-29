@@ -3,25 +3,29 @@
 // ===============================================================
 // 👤 Interface principale représentant un utilisateur dans le système
 // ===============================================================
+// 👤 Interface principale représentant un utilisateur dans le système
+// ===============================================================
 export interface User {
-  id: number;
+  id: string;  // ✅ UUID au lieu de number
   email: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;  // ✅ Utilise firstName au lieu de first_name
+  lastName: string;   // ✅ Utilise lastName au lieu de last_name
   phone?: string;
   avatar?: string;
   role: string;
-  is_active: boolean;
-  is_email_verified: boolean;
-  blocked_until?: Date | null;  
+  active: boolean;    // ✅ Utilise active au lieu de is_active
+  emailVerified: boolean;  // ✅ Utilise emailVerified au lieu de is_email_verified
+  blockedUntil?: string | null;  // ✅ Renommé et en string pour ISO dates
   status?: string;             
-  created_at: Date;
-  updated_at: Date;
-  last_login_at?: Date;
+  createdAt: string;  // ✅ Utilise createdAt et string pour ISO dates
+  updatedAt: string;  // ✅ Utilise updatedAt et string pour ISO dates
+  lastLoginAt?: string | null;  // ✅ Utilise lastLoginAt et string pour ISO dates
+  
+  // Propriétés optionnelles pour l'admin (pas dans l'API)
   email_verification_token?: string;
-  email_verification_expires_at?: Date;
+  email_verification_expires_at?: string;
   password_reset_token?: string;
-  password_reset_expires_at?: Date;
+  password_reset_expires_at?: string;
 }
 
 // ===============================================================
@@ -79,14 +83,14 @@ export interface AuthResponse {
 
 export class UserHelpers {
   static isBlocked(user: User): boolean {
-    if (!user.blocked_until) return false;
-    return new Date() < new Date(user.blocked_until);
+    if (!user.blockedUntil) return false;
+    return new Date() < new Date(user.blockedUntil);
   }
   
   static getBlockedStatus(user: User): string {
-    if (!user.blocked_until) return 'Non bloqué';
+    if (!user.blockedUntil) return 'Non bloqué';
     
-    const blockedUntil = new Date(user.blocked_until);
+    const blockedUntil = new Date(user.blockedUntil);
     const now = new Date();
     
     if (blockedUntil <= now) return 'Blocage expiré';

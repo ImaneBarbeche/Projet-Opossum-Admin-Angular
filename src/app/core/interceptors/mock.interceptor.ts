@@ -69,6 +69,14 @@ export class MockInterceptor implements HttpInterceptor {
     // === MOCK BLOCK/UNBLOCK USER ===
     // 🚫 Bloquer un utilisateur
     if (url.match(/\/admin\/users\/(\d+)\/block$/) && method === 'PUT') {
+      // ✅ Vérifier l'authentification admin
+      if (!this.mockSessionActive || !hasMockSessionCookie) {
+        return of(new HttpResponse({
+          status: 401,
+          body: { message: 'Non authentifié' }
+        })).pipe(delay(200));
+      }
+      
       const userId = parseInt(url.split('/')[url.split('/').length - 2]);
       const blocked_until = req.body.blocked_until;
       const user = this.mockUsers.find(u => u.id === userId);
@@ -85,6 +93,14 @@ export class MockInterceptor implements HttpInterceptor {
 
     // ✅ Débloquer un utilisateur
     if (url.match(/\/admin\/users\/(\d+)\/unblock$/) && method === 'PUT') {
+      // ✅ Vérifier l'authentification admin
+      if (!this.mockSessionActive || !hasMockSessionCookie) {
+        return of(new HttpResponse({
+          status: 401,
+          body: { message: 'Non authentifié' }
+        })).pipe(delay(200));
+      }
+      
       const userId = parseInt(url.split('/')[url.split('/').length - 2]);
       const user = this.mockUsers.find(u => u.id === userId);
       if (user) {

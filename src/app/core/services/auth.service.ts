@@ -33,6 +33,13 @@ export class AuthService {
         if (user) {
           this.currentUserSubject.next(user);
           this.startTokenCheckInterval();
+          
+          // 🔧 AJOUT: Sauvegarder dans sessionStorage pour éviter la déconnexion au refresh
+          sessionStorage.setItem('opossum_user_session', JSON.stringify({
+            user: user,
+            timestamp: Date.now()
+          }));
+          
           // 👇 Gestion du cookie mock si présent
           if ((response as any).setCookie) {
             document.cookie = (response as any).setCookie;
@@ -81,6 +88,10 @@ export class AuthService {
   private completeLogout(): void {
     this.clearTokenCheckInterval();
     this.currentUserSubject.next(null);
+    
+    // 🔧 AJOUT: Nettoyer le sessionStorage
+    sessionStorage.removeItem('opossum_user_session');
+    
     console.log('✅ Déconnexion terminée');
     
     // Rediriger vers login si pas déjà sur la page
@@ -99,10 +110,31 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-  // 🔄 INITIALISATION AU DÉMARRAGE - Pure cookies
+  // 🔄 INITIALISATION AU DÉMARRAGE - Avec fallback sessionStorage
   initializeAuth(): void {
     console.log('🔄 Initialisation de l\'authentification via cookies...');
     
+    // 🔧 ÉTAPE 1: Vérifier d'abord le sessionStorage (fallback pour le refresh)
+    const savedSession = sessionStorage.getItem('opossum_user_session');
+    if (savedSession) {
+      try {
+        const sessionData = JSON.parse(savedSession);
+        const sessionAge = Date.now() - sessionData.timestamp;
+        
+        // Si la session sauvegardée a moins de 8 heures, on la restaure temporairement
+        if (sessionAge < 8 * 60 * 60 * 1000) {
+          console.log('🔄 Session trouvée dans sessionStorage, restauration temporaire...');
+          this.currentUserSubject.next(sessionData.user);
+        } else {
+          sessionStorage.removeItem('opossum_user_session');
+        }
+      } catch (error) {
+        console.error('❌ Erreur lors de la lecture du sessionStorage:', error);
+        sessionStorage.removeItem('opossum_user_session');
+      }
+    }
+    
+    // 🔧 ÉTAPE 2: Vérifier avec le serveur via cookies (prioritaire)
     this.http.get<{user: User, authenticated: boolean}>(`${environment.apiUrl}/auth`, {
       withCredentials: true // ← Le cookie sera envoyé automatiquement
     }).subscribe({
@@ -110,15 +142,32 @@ export class AuthService {
         if (response.authenticated && response.user) {
           this.currentUserSubject.next(response.user);
           this.startTokenCheckInterval(); // Démarrer la vérification périodique
+          
+          // Mettre à jour le sessionStorage avec les données fraîches du serveur
+          sessionStorage.setItem('opossum_user_session', JSON.stringify({
+            user: response.user,
+            timestamp: Date.now()
+          }));
+          
           console.log('✅ Utilisateur reconnecté automatiquement:', response.user.email);
         } else {
-          console.log('ℹ️ Aucune session active');
-          this.currentUserSubject.next(null);
+          console.log('ℹ️ Aucune session active côté serveur');
+          // Ne pas écraser la session locale si elle existe déjà
+          if (!this.currentUserSubject.value) {
+            this.currentUserSubject.next(null);
+            sessionStorage.removeItem('opossum_user_session');
+          }
         }
       },
       error: (error) => {
-        console.log('ℹ️ Pas de session active:', error.status);
-        this.currentUserSubject.next(null);
+        console.log('⚠️ Erreur serveur lors de l\'initialisation:', error.status);
+        // Si erreur serveur mais session locale valide, on garde la session locale
+        if (!this.currentUserSubject.value) {
+          this.currentUserSubject.next(null);
+          sessionStorage.removeItem('opossum_user_session');
+        } else {
+          console.log('🔄 Session locale maintenue malgré l\'erreur serveur');
+        }
       }
     });
   }

@@ -127,24 +127,46 @@ export class UserListComponent implements OnInit {
       }
       this.userService.blockUser(parseInt(userId, 10), durationDays).subscribe({
         next: () => {
+          alert('✅ Utilisateur bloqué avec succès');
           this.loadUsers();
         },
         error: (error) => {
           console.error('Erreur lors du blocage:', error);
+          if (error.status === 401) {
+            alert('❌ Non authentifié - Reconnectez-vous');
+          } else if (error.status === 403) {
+            alert('❌ Vous n\'avez pas les droits pour cette action');
+          } else if (error.status === 404) {
+            alert('❌ Utilisateur non trouvé');
+          } else {
+            alert('❌ Erreur lors du blocage: ' + (error.error?.message || error.message));
+          }
         }
       });
     }
   }
 
   unblockUser(userId: string): void {
-    this.userService.unblockUser(parseInt(userId, 10)).subscribe({
-      next: () => {
-        this.loadUsers();
-      },
-      error: (error) => {
-        console.error('Erreur lors du déblocage:', error);
-      }
-    });
+    if (confirm('Êtes-vous sûr de vouloir débloquer cet utilisateur ?')) {
+      this.userService.unblockUser(parseInt(userId, 10)).subscribe({
+        next: () => {
+          alert('✅ Utilisateur débloqué avec succès');
+          this.loadUsers();
+        },
+        error: (error) => {
+          console.error('Erreur lors du déblocage:', error);
+          if (error.status === 401) {
+            alert('❌ Non authentifié - Reconnectez-vous');
+          } else if (error.status === 403) {
+            alert('❌ Vous n\'avez pas les droits pour cette action');
+          } else if (error.status === 404) {
+            alert('❌ Utilisateur non trouvé');
+          } else {
+            alert('❌ Erreur lors du déblocage: ' + (error.error?.message || error.message));
+          }
+        }
+      });
+    }
   }
 
   deleteUser(userId: string): void {

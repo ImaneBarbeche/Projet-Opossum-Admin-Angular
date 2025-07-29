@@ -5,7 +5,7 @@
 // };
 
 export const environment = {
-  production: true,
+  production: false,
   apiUrl: 'http://localhost:8080/api/v1',  // Début de l'API backend
-  useMockData: false 
+  useMockData: false  // ✅ Désactivé pour utiliser la vraie API
 };

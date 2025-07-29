@@ -11,27 +11,37 @@ export class UserService {
 
   // 👥 Récupérer tous les utilisateurs
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${environment.apiUrl}/users`);
+    return this.http.get<User[]>(`${environment.apiUrl}/users`, {
+      withCredentials: true
+    });
   }
 
   // 👤 Récupérer un utilisateur par ID
   getUserById(id: number): Observable<User> {
-    return this.http.get<User>(`${environment.apiUrl}/users/${id}`);
+    return this.http.get<User>(`${environment.apiUrl}/users/${id}`, {
+      withCredentials: true
+    });
   }
 
   // ✨ Créer un utilisateur
   createUser(userData: CreateUserRequest): Observable<User> {
-    return this.http.post<User>(`${environment.apiUrl}/users`, userData);
+    return this.http.post<User>(`${environment.apiUrl}/users`, userData, {
+      withCredentials: true
+    });
   }
 
   // ✏️ Modifier un utilisateur
   updateUser(id: number, userData: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${environment.apiUrl}/users/${id}`, userData);
+    return this.http.put<User>(`${environment.apiUrl}/users/${id}`, userData, {
+      withCredentials: true
+    });
   }
 
   // 🗑️ Supprimer un utilisateur
   deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${environment.apiUrl}/users/${id}`);
+    return this.http.delete<void>(`${environment.apiUrl}/users/${id}`, {
+      withCredentials: true
+    });
   }
 
   // 🚫 Bloquer un utilisateur - CORRIGÉ
@@ -42,13 +52,17 @@ export class UserService {
     // ✅ CORRECTION : Utiliser environment.apiUrl au lieu de this.apiUrl
     return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/block`, {
       blocked_until: blockedUntil.toISOString()
+    }, {
+      withCredentials: true
     });
   }
 
   // ✅ Débloquer un utilisateur - CORRIGÉ
   unblockUser(userId: number): Observable<void> {
     // ✅ CORRECTION : Utiliser environment.apiUrl au lieu de this.apiUrl
-    return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/unblock`, {});
+    return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/unblock`, {}, {
+      withCredentials: true
+    });
   }
 
   // ✅ Helper pour vérifier si un user est bloqué

@@ -35,19 +35,19 @@ export class UserDetailComponent implements OnInit {
 
   // Vérifie si l'utilisateur est bloqué (helper)
   isUserBlocked(): boolean {
-    return !!this.user?.blocked_until && new Date(this.user.blocked_until) > new Date();
+    return !!this.user?.blockedUntil && new Date(this.user.blockedUntil) > new Date();
   }
 
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
-      this.loadUser(parseInt(userId, 10));
+      this.loadUser(userId);
     } else {
       this.router.navigate(['/users']);
     }
   }
 
-  loadUser(id: number): void {
+  loadUser(id: string): void {
     this.loading = true;
     this.userService.getUserById(id).subscribe({
       next: (user) => {
@@ -59,6 +59,17 @@ export class UserDetailComponent implements OnInit {
       error: (error) => {
         console.error('Erreur lors du chargement de l\'utilisateur:', error);
         this.loading = false;
+        
+        if (error.status === 404) {
+          alert('❌ Utilisateur non trouvé (ID: ' + id + ')');
+        } else if (error.status === 401) {
+          alert('❌ Non authentifié - Reconnectez-vous');
+        } else {
+          alert('❌ Erreur lors du chargement de l\'utilisateur: ' + (error.error?.message || error.message));
+        }
+        
+        // Rediriger vers la liste des utilisateurs
+        this.router.navigate(['/users']);
       }
     });
   }
@@ -66,8 +77,8 @@ export class UserDetailComponent implements OnInit {
   initEditForm(): void {
     if (this.user) {
       this.editForm = {
-        first_name: this.user.first_name,
-        last_name: this.user.last_name,
+        firstName: this.user.firstName,
+        lastName: this.user.lastName,
         email: this.user.email,
         role: this.user.role
       };
@@ -118,17 +129,23 @@ export class UserDetailComponent implements OnInit {
       this.userService.unblockUser(this.user.id).subscribe({
         next: () => {
           this.loadUser(this.user!.id);
-          alert('Utilisateur débloqué avec succès');
+          alert('✅ Utilisateur débloqué avec succès');
         },
         error: (error) => {
           console.error('Erreur lors du déblocage:', error);
-          alert('Une erreur est survenue lors du déblocage');
+          if (error.status === 401) {
+            alert('❌ Non authentifié - Reconnectez-vous');
+          } else if (error.status === 403) {
+            alert('❌ Vous n\'avez pas les droits pour cette action');
+          } else {
+            alert('❌ Erreur lors du déblocage: ' + (error.error?.message || error.message));
+          }
         }
       });
       return;
     }
 
-    if (this.user.is_active) {
+    if (this.user.active) {
       // Bloquer l'utilisateur - demander la durée
       const durationStr = prompt('Durée du blocage en jours (ex: 7, 30) :', '7');
       if (!durationStr) return;
@@ -141,11 +158,17 @@ export class UserDetailComponent implements OnInit {
         this.userService.blockUser(this.user.id, durationDays).subscribe({
           next: () => {
             this.loadUser(this.user!.id);
-            alert('Utilisateur bloqué avec succès');
+            alert('✅ Utilisateur bloqué avec succès');
           },
           error: (error) => {
             console.error('Erreur lors du blocage:', error);
-            alert('Une erreur est survenue lors du blocage');
+            if (error.status === 401) {
+              alert('❌ Non authentifié - Reconnectez-vous');
+            } else if (error.status === 403) {
+              alert('❌ Vous n\'avez pas les droits pour cette action');
+            } else {
+              alert('❌ Erreur lors du blocage: ' + (error.error?.message || error.message));
+            }
           }
         });
       }
@@ -154,7 +177,7 @@ export class UserDetailComponent implements OnInit {
 
     // Activer l'utilisateur (si inactif et non bloqué)
     if (confirm('Activer cet utilisateur ?')) {
-      this.userService.updateUser(this.user.id, { is_active: true }).subscribe({
+      this.userService.updateUser(this.user.id, { active: true }).subscribe({
         next: () => {
           this.loadUser(this.user!.id);
           alert('Utilisateur activé avec succès');
@@ -185,14 +208,14 @@ export class UserDetailComponent implements OnInit {
   }
 
   saveUser(): void {
-    if (!this.user || !this.editForm.first_name || !this.editForm.last_name || !this.editForm.email) {
+    if (!this.user || !this.editForm.firstName || !this.editForm.lastName || !this.editForm.email) {
       alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
     const userData: Partial<User> = {
-      first_name: this.editForm.first_name,
-      last_name: this.editForm.last_name,
+      firstName: this.editForm.firstName,
+      lastName: this.editForm.lastName,
       email: this.editForm.email,
       role: this.editForm.role || this.user.role
     };
@@ -215,7 +238,7 @@ export class UserDetailComponent implements OnInit {
     this.initEditForm();
   }
 
-  formatDate(date: string | Date | undefined): string {
+  formatDate(date: string | Date | null | undefined): string {
     if (!date) return 'Non disponible';
     
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -232,7 +255,7 @@ export class UserDetailComponent implements OnInit {
     // Calcul basique d'un score de confiance
     let score = 50; // Base
     
-    if (user.is_email_verified) score += 20;
+    if (user.emailVerified) score += 20;
     if (user.phone) score += 10;
     
     return Math.min(100, score);

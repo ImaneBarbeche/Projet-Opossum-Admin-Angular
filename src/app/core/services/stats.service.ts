@@ -11,18 +11,26 @@ export class StatsService {
 
   // 🎯 APPEL HTTP DIRECT - L'intercepteur gère le mock !
   getDashboardStats(): Observable<DashboardStats> {
-    return this.http.get<DashboardStats>(`${environment.apiUrl}/stats/dashboard`);
+    return this.http.get<DashboardStats>(
+      `${environment.apiUrl}/stats/dashboard`,
+      { withCredentials: true }
+    );
   }
 
-  getStatsOverTime(period: string = '7days'): Observable<StatsOverTime[]> {
-    return this.http.get<StatsOverTime[]>(`${environment.apiUrl}/stats/overtime?period=${period}`);
-  }
+getStatsOverTime(period: string = '7days'): Observable<StatsOverTime[]> {
+  return this.http.get<StatsOverTime[]>(`${environment.apiUrl}/stats/overtime?period=${period}`, {
+    withCredentials: true  // ← Doit être dans un objet options
+  });
+}
 
   getCategoryStats(): Observable<CategoryStats[]> {
-    return this.http.get<CategoryStats[]>(`${environment.apiUrl}/stats/categories`);
+    return this.http.get<CategoryStats[]>(`${environment.apiUrl}/stats/categories`, {
+      withCredentials: true
+    });
   }
-
   getCityStats(): Observable<CityStats[]> {
-    return this.http.get<CityStats[]>(`${environment.apiUrl}/stats/cities`);
+    return this.http.get<CityStats[]>(`${environment.apiUrl}/stats/cities`, {
+      withCredentials: true
+    });
   }
 }
