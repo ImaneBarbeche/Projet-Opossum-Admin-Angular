@@ -38,10 +38,20 @@
       <div class="profile-header">
         <div class="avatar-section">
           <div class="user-avatar">
-            {{ user.firstName[0] }}{{ user.lastName[0] }}
+            {{ user.firstName ? user.firstName[0] : '' }}{{ user.lastName ? user.lastName[0] : '' }}
           </div>
           <div class="status-badge" [class.active]="user.active">
-            {{ user.active ? 'Actif' : 'Inactif' }}
+            @if (isUserBlocked()) {
+              🚫 Bloqué
+              @if (user.blockedUntil) {
+                jusqu'au {{ formatDate(user.blockedUntil) }}
+              }
+              @if (user.blockReason) {
+                <span class="block-reason">— Motif : {{ user.blockReason }}</span>
+              }
+            } @else {
+              {{ user.active ? '✅ Actif' : '⏸️ Inactif' }}
+            }
           </div>
         </div>
         
@@ -117,22 +127,24 @@
             <span class="info-value">{{ user.id }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Téléphone</span>
-            <span class="info-value">{{ user.phone || 'Non renseigné' }}</span>
+            <span class="info-label">Nom</span>
+            <span class="info-value">{{ user.lastName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Prénom</span>
+            <span class="info-value">{{ user.firstName }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Date d'inscription</span>
             <span class="info-value">{{ formatDate(user.createdAt) }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Dernière connexion</span>
-            <span class="info-value">{{ formatDate(user.lastLoginAt) }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Email vérifié</span>
-            <span class="info-value" [class.verified]="user.emailVerified">
-              {{ user.emailVerified ? 'Oui' : 'Non' }}
-            </span>
+            <span class="info-label">Photo de profil</span>
+            @if (user.avatar) {
+              <img [src]="user.avatar" alt="Avatar" class="user-avatar" />
+            } @else {
+              <span class="info-value">Aucune photo</span>
+            }
           </div>
         </div>
       </div>

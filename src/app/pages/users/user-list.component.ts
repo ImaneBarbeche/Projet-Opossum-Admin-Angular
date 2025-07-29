@@ -13,6 +13,18 @@ import { User } from '../../core/models/user.model';
   styleUrl: './user-list.component.css'
 })
 export class UserListComponent implements OnInit {
+  // Utilitaire pour savoir si un utilisateur est bloqué (supporte unblockAt ET blockedUntil)
+  isUserBlocked(user: User): boolean {
+    if (user.status === 'BLOCKED') {
+      // Prendre la date de déblocage la plus tardive si les deux existent
+      const unblockDate = user.unblockAt || user.blockedUntil;
+      if (unblockDate) {
+        return new Date(unblockDate) > new Date();
+      }
+      return true; // Blocage permanent si pas de date
+    }
+    return false;
+  }
   users: User[] = [];
   filteredUsers: User[] = [];
   isLoading = true;
@@ -45,6 +57,16 @@ export class UserListComponent implements OnInit {
     this.isLoading = true;
     this.userService.getAllUsers().subscribe({
       next: (users) => {
+        // Log détaillé pour chaque utilisateur
+        users.forEach(u => {
+          console.log(`[UserList] ${u.firstName} ${u.lastName}`,
+            'status:', u.status,
+            'unblockAt:', u.unblockAt,
+            'blockedUntil:', u.blockedUntil,
+            'active:', u.active,
+            'emailVerified:', u.emailVerified
+          );
+        });
         this.users = users;
         this.calculateStats();
         this.applyFilters();
@@ -59,8 +81,8 @@ export class UserListComponent implements OnInit {
 
   calculateStats(): void {
     this.totalUsers = this.users.length;
-    this.activeUsers = this.users.filter(u => u.is_active).length;
-    this.blockedUsers = this.users.filter(u => !u.is_active).length;
+    this.activeUsers = this.users.filter(u => u.active && !this.isUserBlocked(u)).length;
+    this.blockedUsers = this.users.filter(u => this.isUserBlocked(u)).length;
   }
 
   onSearch(): void {
@@ -80,10 +102,10 @@ export class UserListComponent implements OnInit {
     // Filtre par statut
     switch (this.currentFilter) {
       case 'active':
-        filtered = filtered.filter(u => u.is_active);
+        filtered = filtered.filter(u => u.active && !this.isUserBlocked(u));
         break;
       case 'blocked':
-        filtered = filtered.filter(u => !u.is_active);
+        filtered = filtered.filter(u => this.isUserBlocked(u));
         break;
     }
 
@@ -91,7 +113,7 @@ export class UserListComponent implements OnInit {
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(u => 
-        `${u.first_name} ${u.last_name}`.toLowerCase().includes(term) || 
+        `${u.firstName} ${u.lastName}`.toLowerCase().includes(term) || 
         u.email.toLowerCase().includes(term)
       );
     }
@@ -119,13 +141,18 @@ export class UserListComponent implements OnInit {
 
   blockUser(userId: string): void {
     if (confirm('Êtes-vous sûr de vouloir bloquer cet utilisateur ?')) {
+      const reason = prompt('Motif du blocage ?', '');
+      if (!reason || reason.trim().length === 0) {
+        alert('Veuillez entrer un motif de blocage.');
+        return;
+      }
       const durationStr = prompt('Durée du blocage en jours ?', '7');
       const durationDays = durationStr ? parseInt(durationStr, 10) : 7;
       if (isNaN(durationDays) || durationDays <= 0) {
         alert('Veuillez entrer une durée valide (nombre de jours).');
         return;
       }
-      this.userService.blockUser(parseInt(userId, 10), durationDays).subscribe({
+      this.userService.blockUser(userId, durationDays, reason).subscribe({
         next: () => {
           alert('✅ Utilisateur bloqué avec succès');
           this.loadUsers();
@@ -148,7 +175,7 @@ export class UserListComponent implements OnInit {
 
   unblockUser(userId: string): void {
     if (confirm('Êtes-vous sûr de vouloir débloquer cet utilisateur ?')) {
-      this.userService.unblockUser(parseInt(userId, 10)).subscribe({
+      this.userService.unblockUser(userId).subscribe({
         next: () => {
           alert('✅ Utilisateur débloqué avec succès');
           this.loadUsers();
@@ -171,7 +198,7 @@ export class UserListComponent implements OnInit {
 
   deleteUser(userId: string): void {
     if (confirm('⚠️ ATTENTION ! Supprimer cet utilisateur est IRRÉVERSIBLE. Continuer ?')) {
-      this.userService.deleteUser(parseInt(userId)).subscribe({
+      this.userService.deleteUser(userId).subscribe({
         next: () => {
           this.loadUsers();
         },
@@ -188,13 +215,15 @@ export class UserListComponent implements OnInit {
   }
 
   getFullName(user: User): string {
-    return `${user.first_name} ${user.last_name}`;
+    return `${user.firstName} ${user.lastName}`;
   }
 
-  formatDate(date: Date | string): string {
-    return new Date(date).toLocaleDateString('fr-FR', {
+  formatDate(date: Date | string | null | undefined): string {
+    if (!date) return 'Non disponible';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('fr-FR', {
       day: '2-digit',
-      month: '2-digit', 
+      month: '2-digit',
       year: 'numeric'
     });
   }

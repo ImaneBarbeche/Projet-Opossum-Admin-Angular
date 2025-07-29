@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { User, CreateUserRequest } from '../models/user.model';
+import { map } from 'rxjs/operators';
+import { User, CreateUserRequest, UserHelpers } from '../models/user.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -11,71 +12,96 @@ export class UserService {
 
   // 👥 Récupérer tous les utilisateurs
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${environment.apiUrl}/users`, {
+    return this.http.get<any>(`${environment.apiUrl}/admin/users`, {
       withCredentials: true
-    });
+    }).pipe(
+      map(response => {
+        // Si la réponse est déjà un tableau
+        if (Array.isArray(response)) {
+          return response.map((u: any) => UserHelpers.fromApi(u));
+        }
+        // Sinon, structure paginée
+        const content = response?.data?.content ?? [];
+        return Array.isArray(content)
+          ? content.map((u: any) => UserHelpers.fromApi(u))
+          : [];
+      })
+    );
   }
 
-  // 👤 Récupérer un utilisateur par ID
-  getUserById(id: number): Observable<User> {
-    return this.http.get<User>(`${environment.apiUrl}/users/${id}`, {
+  // 👤 Récupérer un utilisateur par ID (admin)
+  getUserById(id: string): Observable<User> {
+    return this.http.get<any>(`${environment.apiUrl}/admin/users/${id}`, {
       withCredentials: true
-    });
+    }).pipe(
+      map(raw => {
+        console.log('[API user raw]', raw); // DEBUG: log la réponse brute
+        return UserHelpers.fromApi(raw.data);
+      })
+    );
   }
 
   // ✨ Créer un utilisateur
   createUser(userData: CreateUserRequest): Observable<User> {
-    return this.http.post<User>(`${environment.apiUrl}/users`, userData, {
+    return this.http.post<User>(`${environment.apiUrl}/admin/users`, userData, {
       withCredentials: true
     });
   }
 
-  // ✏️ Modifier un utilisateur
-  updateUser(id: number, userData: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${environment.apiUrl}/users/${id}`, userData, {
+  // ✏️ Modifier un utilisateur (admin)
+  updateUser(id: string, userData: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${environment.apiUrl}/admin/users/${id}`, userData, {
       withCredentials: true
     });
   }
 
-  // 🗑️ Supprimer un utilisateur
-  deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${environment.apiUrl}/users/${id}`, {
+  // 🗑️ Supprimer un utilisateur (admin)
+  deleteUser(id: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/admin/users/${id}`, {
       withCredentials: true
     });
   }
 
   // 🚫 Bloquer un utilisateur - CORRIGÉ
-  blockUser(userId: number, durationDays: number): Observable<void> {
-    const blockedUntil = new Date();
-    blockedUntil.setDate(blockedUntil.getDate() + durationDays);
-    
-    // ✅ CORRECTION : Utiliser environment.apiUrl au lieu de this.apiUrl
+  blockUser(userId: string, durationDays: number, reason: string): Observable<void> {
+    // Nouvelle API: envoie raison et durée
     return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/block`, {
-      blocked_until: blockedUntil.toISOString()
+      reason,
+      duration: durationDays
     }, {
       withCredentials: true
     });
   }
 
   // ✅ Débloquer un utilisateur - CORRIGÉ
-  unblockUser(userId: number): Observable<void> {
+  unblockUser(userId: string): Observable<void> {
     // ✅ CORRECTION : Utiliser environment.apiUrl au lieu de this.apiUrl
     return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/unblock`, {}, {
       withCredentials: true
     });
   }
 
-  // ✅ Helper pour vérifier si un user est bloqué
-  // ✅ Helper pour vérifier si un user est bloqué
+  // ✅ Helper pour vérifier si un user est bloqué (nouvelle API: status/unblockAt)
   isUserBlocked(user: User): boolean {
-    // Suppose a user is blocked if blocked_until exists and is in the future
-    return !!user.blocked_until && new Date(user.blocked_until) > new Date();
+    // Bloqué si status === 'BLOCKED' et (unblockAt absent ou dans le futur)
+    if (user.status === 'BLOCKED') {
+      if (user.unblockAt) {
+        return new Date(user.unblockAt) > new Date();
+      }
+      return true; // Blocage permanent si pas de date
+    }
+    return false;
   }
 
-  // ✅ Helper pour l'affichage du statut de blocage
+  // ✅ Helper pour l'affichage du statut de blocage (nouvelle API)
   getUserBlockedStatus(user: User): string {
     if (this.isUserBlocked(user)) {
-      return `Bloqué jusqu'au ${new Date(user.blocked_until!).toLocaleString()}`;
+      // Priorité à unblockAt, sinon blockedUntil (legacy)
+      const endDate = user.unblockAt || user.blockedUntil;
+      if (endDate) {
+        return `Bloqué jusqu'au ${new Date(endDate).toLocaleString()}` + (user.blockReason ? ` (Motif: ${user.blockReason})` : '');
+      }
+      return `Bloqué${user.blockReason ? ` (Motif: ${user.blockReason})` : ''}`;
     }
     return 'Actif';
   }

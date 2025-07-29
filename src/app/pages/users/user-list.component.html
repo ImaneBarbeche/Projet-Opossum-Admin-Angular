@@ -52,9 +52,9 @@
         <div class="user-card" [class.blocked]="!user.active">
           <div class="user-avatar">
             @if (user.avatar) {
-              <img [src]="user.avatar" [alt]="user.firstName + ' ' + user.lastName" />
+              <img [src]="user.avatar" [alt]="user.firstName && user.lastName ? (user.firstName + ' ' + user.lastName) : 'Avatar utilisateur'" />
             } @else {
-              <div class="avatar-placeholder">{{ getInitials(user.firstName + ' ' + user.lastName) }}</div>
+              <div class="avatar-placeholder" aria-label="Avatar utilisateur">{{ getInitials(user.firstName + ' ' + user.lastName) }}</div>
             }
           </div>
           
@@ -67,12 +67,22 @@
             </div>
             
             <div class="user-status">
-              @if (!user.active) {
-                <span class="status-badge blocked">🚫 Bloqué</span>
+              @if (isUserBlocked(user)) {
+                <span class="status-badge blocked">
+                  🚫 Bloqué
+                  @if (user.unblockAt || user.blockedUntil) {
+                    jusqu'au {{ formatDate(user.unblockAt || user.blockedUntil) }}
+                  }
+                  @if (user.blockReason) {
+                    <span class="block-reason">— Motif : {{ user.blockReason }}</span>
+                  }
+                </span>
               } @else if (user.active && user.emailVerified) {
                 <span class="status-badge active">✅ Actif</span>
-              } @else {
+              } @else if (user.active) {
                 <span class="status-badge inactive">⏸️ Non vérifié</span>
+              } @else {
+                <span class="status-badge blocked">🚫 Bloqué</span>
               }
             </div>
           </div>

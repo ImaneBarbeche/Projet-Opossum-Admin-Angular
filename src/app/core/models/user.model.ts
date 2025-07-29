@@ -15,8 +15,10 @@ export interface User {
   role: string;
   active: boolean;    // ✅ Utilise active au lieu de is_active
   emailVerified: boolean;  // ✅ Utilise emailVerified au lieu de is_email_verified
-  blockedUntil?: string | null;  // ✅ Renommé et en string pour ISO dates
-  status?: string;             
+  blockedUntil?: string | null;  // Ancien champ (legacy)
+  status?: string;
+  unblockAt?: string | null; // Nouvelle API: date de déblocage
+  blockReason?: string | null; // Nouvelle API: motif du blocage
   createdAt: string;  // ✅ Utilise createdAt et string pour ISO dates
   updatedAt: string;  // ✅ Utilise updatedAt et string pour ISO dates
   lastLoginAt?: string | null;  // ✅ Utilise lastLoginAt et string pour ISO dates
@@ -37,17 +39,6 @@ export enum UserRole {
   USER = 'user'          // Utilisateur standard
 }
 
-// ===============================================================
-// 📤 Données requises pour créer un utilisateur (envoyées au backend)
-// Utilisée dans un formulaire d’inscription ou back-office admin
-// ===============================================================
-export interface CreateUserRequest {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;     // Mot de passe en clair (il sera hashé côté back)
-  role: UserRole;
-}
 
 // ===============================================================
 // 📤 Données requises pour créer un utilisateur (envoyées au backend)
@@ -97,5 +88,30 @@ export class UserHelpers {
     
     const diffDays = Math.ceil((blockedUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return `Bloqué encore ${diffDays} jour(s)`;
+  }
+  /**
+   * Mappe un objet utilisateur reçu du backend (snake_case) vers l'interface User (camelCase)
+   */
+  static fromApi(raw: any): User {
+    const source = raw.data ?? raw;
+    return {
+      id: source.id,
+      email: source.email,
+      firstName: source.first_name ?? source.firstName,
+      lastName: source.last_name ?? source.lastName,
+      phone: source.phone,
+      avatar: source.avatar,
+      role: source.role,
+      active: source.active,
+      emailVerified: source.email_verified ?? source.emailVerified,
+      blockedUntil: source.blocked_until ?? source.blockedUntil,
+      unblockAt: source.unblock_at ?? source.unblockAt,
+      blockReason: source.block_reason ?? source.blockReason,
+      status: source.status,
+      createdAt: source.created_at ?? source.createdAt,
+      updatedAt: source.updated_at ?? source.updatedAt,
+      lastLoginAt: source.last_login_at ?? source.lastLoginAt,
+      // autres propriétés si besoin
+    } as User;
   }
 }

@@ -8,7 +8,7 @@ import { Listing, ListingFilters, ListingResponse, ListingStatus } from '../mode
   providedIn: 'root'
 })
 export class ListingService {
-  private apiUrl = `${environment.apiUrl}/admin/listings`;
+  private apiUrl = `${environment.apiUrl}/admin/announcements`;
 
   constructor(private http: HttpClient) {}
 

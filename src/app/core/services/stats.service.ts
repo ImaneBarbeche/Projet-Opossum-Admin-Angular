@@ -12,7 +12,7 @@ export class StatsService {
   // 🎯 APPEL HTTP DIRECT - L'intercepteur gère le mock !
   getDashboardStats(): Observable<DashboardStats> {
     return this.http.get<DashboardStats>(
-      `${environment.apiUrl}/stats/dashboard`,
+      `${environment.apiUrl}/admin/stats`,
       { withCredentials: true }
     );
   }

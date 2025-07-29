@@ -335,7 +335,7 @@ export class ListingListComponent implements OnInit {
     // Vérifier si l'utilisateur est l'auteur de l'annonce
   private isListingAuthor(listing: Listing): boolean {
     const currentUser = this.authService.getCurrentUser();
-    return currentUser?.id === listing.user_id;
+    return currentUser ? Number(currentUser.id) === listing.user_id : false;
   }
   // ✅ Utilitaires
   formatDate(date: Date | string): string {

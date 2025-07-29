@@ -35,7 +35,7 @@ export class UserDetailComponent implements OnInit {
 
   // Vérifie si l'utilisateur est bloqué (helper)
   isUserBlocked(): boolean {
-    return !!this.user?.blockedUntil && new Date(this.user.blockedUntil) > new Date();
+    return !!this.user?.blockedUntil && new Date(this.user.blockedUntil!) > new Date();
   }
 
   ngOnInit(): void {
@@ -51,6 +51,7 @@ export class UserDetailComponent implements OnInit {
     this.loading = true;
     this.userService.getUserById(id).subscribe({
       next: (user) => {
+        console.log('[UserDetailComponent] user reçu', user); // DEBUG
         this.user = user;
         this.initEditForm();
         this.loadRecentActivity();
@@ -126,9 +127,10 @@ export class UserDetailComponent implements OnInit {
       // Débloquer l'utilisateur avec prompt de confirmation
       const confirmUnblock = confirm('Voulez-vous vraiment débloquer cet utilisateur ?');
       if (!confirmUnblock) return;
+      // Endpoint: PATCH /api/v1/admin/users/:id/unblock
       this.userService.unblockUser(this.user.id).subscribe({
         next: () => {
-          this.loadUser(this.user!.id);
+          this.loadUser(String(this.user!.id));
           alert('✅ Utilisateur débloqué avec succès');
         },
         error: (error) => {
@@ -146,7 +148,12 @@ export class UserDetailComponent implements OnInit {
     }
 
     if (this.user.active) {
-      // Bloquer l'utilisateur - demander la durée
+      // Bloquer l'utilisateur - demander motif et durée
+      const reason = prompt('Motif du blocage ?', '');
+      if (!reason || reason.trim().length === 0) {
+        alert('Veuillez entrer un motif de blocage.');
+        return;
+      }
       const durationStr = prompt('Durée du blocage en jours (ex: 7, 30) :', '7');
       if (!durationStr) return;
       const durationDays = parseInt(durationStr, 10);
@@ -154,10 +161,11 @@ export class UserDetailComponent implements OnInit {
         alert('Veuillez entrer un nombre de jours valide');
         return;
       }
-      if (confirm(`Bloquer cet utilisateur pendant ${durationDays} jours ?`)) {
-        this.userService.blockUser(this.user.id, durationDays).subscribe({
+      if (confirm(`Bloquer cet utilisateur pendant ${durationDays} jours ? Motif: ${reason}`)) {
+        // Endpoint: PATCH /api/v1/admin/users/:id/block
+        this.userService.blockUser(this.user.id, durationDays, reason).subscribe({
           next: () => {
-            this.loadUser(this.user!.id);
+            this.loadUser(String(this.user!.id));
             alert('✅ Utilisateur bloqué avec succès');
           },
           error: (error) => {
@@ -177,9 +185,10 @@ export class UserDetailComponent implements OnInit {
 
     // Activer l'utilisateur (si inactif et non bloqué)
     if (confirm('Activer cet utilisateur ?')) {
+      // Endpoint: PATCH /api/v1/admin/users/:id
       this.userService.updateUser(this.user.id, { active: true }).subscribe({
         next: () => {
-          this.loadUser(this.user!.id);
+          this.loadUser(String(this.user!.id));
           alert('Utilisateur activé avec succès');
         },
         error: (error) => {
@@ -194,6 +203,7 @@ export class UserDetailComponent implements OnInit {
     if (!this.user) return;
 
     if (confirm('Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ? Cette action est irréversible.')) {
+      // Endpoint: DELETE /api/v1/admin/users/:id
       this.userService.deleteUser(this.user.id).subscribe({
         next: () => {
           alert('Utilisateur supprimé avec succès');
@@ -220,6 +230,7 @@ export class UserDetailComponent implements OnInit {
       role: this.editForm.role || this.user.role
     };
 
+    // Endpoint: PATCH /api/v1/admin/users/:id
     this.userService.updateUser(this.user.id, userData).subscribe({
       next: (user) => {
         this.user = user;
