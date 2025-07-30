@@ -38,7 +38,7 @@
       <div class="form-group">
         <label for="password">Mot de passe</label>
         <input id="password" type="password" formControlName="password" class="form-control"
-          [class.is-invalid]="isFieldInvalid('password')" placeholder="admin">
+          [class.is-invalid]="isFieldInvalid('password')" placeholder="adminPassword">
 
         @if (isFieldInvalid('password')) {
         <div class="invalid-feedback">
@@ -64,7 +64,7 @@
       <small>
         <strong>Compte de test :</strong><br>
         Email: admin&#64;opossum.com<br>
-        Mot de passe: admin
+        Mot de passe: adminPassword
       </small>
     </div>
   </div>

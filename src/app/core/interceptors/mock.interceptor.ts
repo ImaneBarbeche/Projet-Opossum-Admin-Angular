@@ -295,7 +295,7 @@ export class MockInterceptor implements HttpInterceptor {
     }
 
     // 📊 STATS DASHBOARD
-    if (url.includes('/stats/dashboard') && method === 'GET') {
+    if (url.includes('/admin/stats') && method === 'GET') {
       return of(new HttpResponse({
         status: 200,
         body: {
@@ -312,6 +312,326 @@ export class MockInterceptor implements HttpInterceptor {
           resolutionRate: 78.5
         }
       })).pipe(delay(700));
+    }
+
+    // 👥 UTILISATEURS RÉCENTS
+    if (url.includes('/admin/recent-users') && method === 'GET') {
+      return of(new HttpResponse({
+        status: 200,
+        body: [
+          {
+            id: 101,
+            firstName: 'Marie',
+            lastName: 'Dubois',
+            email: 'marie.dubois@email.com',
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // Il y a 2h
+            role: 'user'
+          },
+          {
+            id: 102,
+            firstName: 'Pierre', 
+            lastName: 'Martin',
+            email: 'pierre.martin@email.com',
+            createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // Il y a 5h
+            role: 'user'
+          },
+          {
+            id: 103,
+            firstName: 'Sophie',
+            lastName: 'Leclerc',
+            email: 'sophie.leclerc@email.com', 
+            createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // Il y a 8h
+            role: 'user'
+          },
+          {
+            id: 104,
+            firstName: 'Thomas',
+            lastName: 'Rousseau',
+            email: 'thomas.rousseau@email.com',
+            createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // Il y a 12h
+            role: 'user'
+          },
+          {
+            id: 105,
+            firstName: 'Emma',
+            lastName: 'Bernard',
+            email: 'emma.bernard@email.com',
+            createdAt: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(), // Il y a 18h
+            role: 'user'
+          }
+        ]
+      })).pipe(delay(500));
+    }
+
+    // 📦 ANNONCES RÉCENTES  
+    if (url.includes('/admin/recent-listings') && method === 'GET') {
+      return of(new HttpResponse({
+        status: 200,
+        body: [
+          {
+            id: 201,
+            title: 'AirPods Pro perdus',
+            type: 'LOST',
+            category: 'electronics',
+            city: 'Lyon',
+            createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // Il y a 1h
+            status: 'ACTIVE',
+            userName: 'Marie Dubois'
+          },
+          {
+            id: 202,
+            title: 'Portefeuille noir trouvé',
+            type: 'FOUND', 
+            category: 'accessories',
+            city: 'Paris',
+            createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // Il y a 3h
+            status: 'ACTIVE',
+            userName: 'Pierre Martin'
+          },
+          {
+            id: 203,
+            title: 'Clés avec porte-clés Mickey',
+            type: 'FOUND',
+            category: 'keys', 
+            city: 'Marseille',
+            createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // Il y a 6h
+            status: 'RESOLVED',
+            userName: 'Sophie Leclerc'
+          },
+          {
+            id: 204,
+            title: 'iPhone 13 perdu gare du Nord',
+            type: 'LOST',
+            category: 'electronics',
+            city: 'Paris',
+            createdAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(), // Il y a 10h
+            status: 'ACTIVE',
+            userName: 'Thomas Rousseau'
+          },
+          {
+            id: 205,
+            title: 'Sac à dos bleu trouvé',
+            type: 'FOUND',
+            category: 'accessories',
+            city: 'Toulouse',
+            createdAt: new Date(Date.now() - 14 * 60 * 60 * 1000).toISOString(), // Il y a 14h
+            status: 'ACTIVE',
+            userName: 'Emma Bernard'
+          }
+        ]
+      })).pipe(delay(500));
+    }
+
+    // 🎯 ACTIONS ADMIN RÉCENTES
+    if (url.includes('/admin/recent-actions') && method === 'GET') {
+      return of(new HttpResponse({
+        status: 200,
+        body: [
+          {
+            id: 301,
+            type: 'USER_BLOCKED',
+            description: 'Utilisateur bloqué pour spam d\'annonces',
+            adminName: 'Admin Laurent',
+            targetType: 'user',
+            targetId: 88,
+            createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString() // Il y a 30min
+          },
+          {
+            id: 302,
+            type: 'LISTING_ARCHIVED',
+            description: 'Annonce archivée : contenu inapproprié',
+            adminName: 'Admin Laurent',
+            targetType: 'listing',
+            targetId: 156,
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // Il y a 2h
+          },
+          {
+            id: 303,
+            type: 'USER_UNBLOCKED',
+            description: 'Utilisateur débloqué après appel',
+            adminName: 'Admin Laurent',
+            targetType: 'user',
+            targetId: 92,
+            createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // Il y a 4h
+          },
+          {
+            id: 304,
+            type: 'LISTING_DELETED',
+            description: 'Annonce supprimée : doublon détecté',
+            adminName: 'Admin Laurent',
+            targetType: 'listing',
+            targetId: 167,
+            createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() // Il y a 6h
+          },
+          {
+            id: 305,
+            type: 'LISTING_ARCHIVED',
+            description: 'Annonce archivée : résolution confirmée', 
+            adminName: 'Admin Laurent',
+            targetType: 'listing',
+            targetId: 134,
+            createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() // Il y a 8h
+          }
+        ]
+      })).pipe(delay(500));
+    }
+
+    // � STATS ÉVOLUTION TEMPORELLE
+    if (url.includes('/stats/overtime') && method === 'GET') {
+      return of(new HttpResponse({
+        status: 200,
+        body: [
+          {
+            date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+            newUsers: 8,
+            newListings: 12,
+            resolvedListings: 5
+          },
+          {
+            date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            newUsers: 6,
+            newListings: 15,
+            resolvedListings: 7
+          },
+          {
+            date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+            newUsers: 12,
+            newListings: 18,
+            resolvedListings: 9
+          },
+          {
+            date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+            newUsers: 5,
+            newListings: 10,
+            resolvedListings: 4
+          },
+          {
+            date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            newUsers: 9,
+            newListings: 14,
+            resolvedListings: 6
+          },
+          {
+            date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+            newUsers: 7,
+            newListings: 11,
+            resolvedListings: 3
+          },
+          {
+            date: new Date().toISOString(),
+            newUsers: 7,
+            newListings: 8,
+            resolvedListings: 3
+          }
+        ]
+      })).pipe(delay(600));
+    }
+
+    // �📊 STATS PAR CATÉGORIES
+    if (url.includes('/stats/categories') && method === 'GET') {
+      return of(new HttpResponse({
+        status: 200,
+        body: [
+          {
+            category: 'electronics',
+            lostCount: 45,
+            foundCount: 38,
+            resolvedCount: 31,
+            resolutionRate: 81.6
+          },
+          {
+            category: 'accessories',
+            lostCount: 32,
+            foundCount: 28,
+            resolvedCount: 22,
+            resolutionRate: 78.6
+          },
+          {
+            category: 'keys',
+            lostCount: 28,
+            foundCount: 31,
+            resolvedCount: 26,
+            resolutionRate: 83.9
+          },
+          {
+            category: 'documents',
+            lostCount: 19,
+            foundCount: 15,
+            resolvedCount: 12,
+            resolutionRate: 80.0
+          },
+          {
+            category: 'clothing',
+            lostCount: 16,
+            foundCount: 12,
+            resolvedCount: 9,
+            resolutionRate: 75.0
+          },
+          {
+            category: 'jewelry',
+            lostCount: 8,
+            foundCount: 5,
+            resolvedCount: 4,
+            resolutionRate: 80.0
+          },
+          {
+            category: 'other',
+            lostCount: 12,
+            foundCount: 9,
+            resolvedCount: 7,
+            resolutionRate: 77.8
+          }
+        ]
+      })).pipe(delay(600));
+    }
+
+    // 🏙️ STATS PAR VILLES
+    if (url.includes('/stats/cities') && method === 'GET') {
+      return of(new HttpResponse({
+        status: 200,
+        body: [
+          {
+            city: 'Paris',
+            totalListings: 85,
+            lostItems: 42,
+            foundItems: 43,
+            resolvedItems: 28,
+            resolutionRate: 82.4
+          },
+          {
+            city: 'Lyon',
+            totalListings: 34,
+            lostItems: 18,
+            foundItems: 16,
+            resolvedItems: 12,
+            resolutionRate: 75.0
+          },
+          {
+            city: 'Marseille',
+            totalListings: 28,
+            lostItems: 15,
+            foundItems: 13,
+            resolvedItems: 10,
+            resolutionRate: 71.4
+          },
+          {
+            city: 'Toulouse',
+            totalListings: 22,
+            lostItems: 11,
+            foundItems: 11,
+            resolvedItems: 8,
+            resolutionRate: 72.7
+          },
+          {
+            city: 'Nice',
+            totalListings: 16,
+            lostItems: 8,
+            foundItems: 8,
+            resolvedItems: 6,
+            resolutionRate: 75.0
+          }
+        ]
+      })).pipe(delay(600));
     }
 
         // 📦 LISTINGS - GET ALL
