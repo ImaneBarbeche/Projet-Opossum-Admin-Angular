@@ -25,12 +25,12 @@ export enum ListingCategory {
   OTHER = 'OTHER'
 }
 
-// Interface : structure exacte de nos objets
+// Interface : structure exacte de nos objets Listing
 export interface Listing {
-  id: number;
+  id: string; // toujours string (même si backend number)
   title: string;
   description: string;
-  user_id: number;
+  user_id: string; // string pour cohérence Angular (même si backend number)
   address: string;
   city: string;
   latitude?: number;
@@ -38,17 +38,16 @@ export interface Listing {
   contact_email: string;
   contact_phone?: string;
   photo_url?: string;
-  category: ListingCategory;  
+  category: ListingCategory;
   type: ListingType;
   status: ListingStatus;
   is_lost: boolean;
-  resolved_at?: Date;
-  created_at: Date;
-  updated_at: Date;
-  
+  resolved_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-// Interface pour les filtres
+// Interface pour les filtres de recherche
 export interface ListingFilters {
   status?: ListingStatus | 'ALL';
   type?: ListingType | 'ALL';
@@ -61,10 +60,14 @@ export interface ListingFilters {
   offset?: number;
 }
 
-// Interface pour les réponses API
+// Interface pour la réponse API attendue
 export interface ListingResponse {
-  listings: Listing[];
-  total: number;
-  page: number;
-  limit: number;
+  data: {
+    listings: Listing[];
+    total: number;
+    page: number;
+    limit: number;
+  };
+  success: boolean;
+  timestamp: string;
 }

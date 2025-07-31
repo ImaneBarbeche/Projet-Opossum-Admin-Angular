@@ -4,12 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { ListingService } from '../../core/services/listing.service';
 import { AuthService } from '../../core/services/auth.service';
-import { 
-  Listing, 
-  ListingStatus, 
-  ListingType, 
+import {
+  Listing,
+  ListingStatus,
+  ListingType,
   ListingCategory,
-  ListingFilters 
+  ListingFilters
 } from '../../core/models/listing.model';
 
 @Component({
@@ -21,7 +21,7 @@ import {
 
 })
 export class ListingListComponent implements OnInit {
-  
+
 
   private readonly listingService = inject(ListingService);
   private readonly authService = inject(AuthService);
@@ -36,7 +36,7 @@ export class ListingListComponent implements OnInit {
   listings = signal<Listing[]>([]);
   isLoading = signal(false);
   error = signal<string | null>(null);
-  
+
 
   searchTerm = signal('');
   selectedStatus = signal<ListingStatus | 'ALL'>('ALL');
@@ -68,6 +68,7 @@ export class ListingListComponent implements OnInit {
 
   // ✅ Chargement des listings
   loadListings(): void {
+
     this.isLoading.set(true);
     this.error.set(null);
 
@@ -79,10 +80,13 @@ export class ListingListComponent implements OnInit {
       includeArchived: this.includeArchived(),
       includeDeleted: this.includeDeleted()
     };
-
+  console.log('Filtres envoyés à l’API', filters);
     this.listingService.getAllListings(filters).subscribe({
       next: (response) => {
-        this.listings.set(response.listings || []);
+        console.log('Réponse API', response);
+        console.log('Listings reçus', response.data?.listings);
+        this.listings.set(response.data?.listings || []);
+        console.log('Signal listings', this.listings());
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -157,7 +161,7 @@ export class ListingListComponent implements OnInit {
   getTypeBadgeClass(type: ListingType): string {
     return `type-${type.toLowerCase()}`;
   }
-    getStatusLabel(status: ListingStatus): string {
+  getStatusLabel(status: ListingStatus): string {
     switch (status) {
       case ListingStatus.ACTIVE: return 'Active';
       case ListingStatus.RESOLVED: return 'Résolue';
@@ -198,7 +202,7 @@ export class ListingListComponent implements OnInit {
   }
 
   // ✅ Méthodes de contrôle d'accès
-    // Vérifier si peut marquer comme résolu (ACTIVE → RESOLVED)
+  // Vérifier si peut marquer comme résolu (ACTIVE → RESOLVED)
   canResolve(listing: Listing): boolean {
     return listing.status === ListingStatus.ACTIVE;
   }
@@ -216,7 +220,7 @@ export class ListingListComponent implements OnInit {
   // Marquer comme résolu
   markAsResolved(listing: Listing): void {
     if (confirm('Marquer cette annonce comme résolue ?')) {
-      this.listingService.updateListingStatus(listing.id, ListingStatus.RESOLVED).subscribe({
+      this.listingService.updateListingStatus(Number(listing.id), ListingStatus.RESOLVED).subscribe({
         next: () => {
           this.loadListings();
         },
@@ -227,14 +231,14 @@ export class ListingListComponent implements OnInit {
       });
     }
   }
-   // Vérifier si peut réactiver (RESOLVED → ACTIVE : Admin uniquement)
+  // Vérifier si peut réactiver (RESOLVED → ACTIVE : Admin uniquement)
   canReactivate(listing: Listing): boolean {
     return this.isAdmin() && listing.status === ListingStatus.RESOLVED;
   }
 
   archiveListing(listing: Listing): void {
     if (confirm('Archiver cette annonce ?')) {
-      this.listingService.archiveListing(listing.id).subscribe({
+      this.listingService.archiveListing(Number(listing.id)).subscribe({
         next: () => {
           this.loadListings();
         },
@@ -248,7 +252,7 @@ export class ListingListComponent implements OnInit {
 
   deleteListing(listing: Listing): void {
     if (confirm('⚠️ ATTENTION ! Supprimer définitivement cette annonce ?')) {
-      this.listingService.deleteListing(listing.id).subscribe({
+      this.listingService.deleteListing(Number(listing.id)).subscribe({
         next: () => {
           this.loadListings();
         },
@@ -259,12 +263,12 @@ export class ListingListComponent implements OnInit {
       });
     }
   }
-   // Réactiver une annonce (RESOLVED → ACTIVE : Admin uniquement)
+  // Réactiver une annonce (RESOLVED → ACTIVE : Admin uniquement)
   reactivateListing(listing: Listing): void {
     if (!this.canReactivate(listing)) return;
-    
+
     if (confirm('Réactiver cette annonce résolue ?')) {
-      this.listingService.updateListingStatus(listing.id, ListingStatus.ACTIVE).subscribe({
+      this.listingService.updateListingStatus(Number(listing.id), ListingStatus.ACTIVE).subscribe({
         next: () => {
           this.loadListings();
         },
@@ -278,11 +282,11 @@ export class ListingListComponent implements OnInit {
 
   // Voir détails
   viewListingDetails(listing: Listing): void {
-    // Navigation vers la page de détail
-    this.router.navigate(['/admin/listings', listing.id]);
+    // Navigation vers la page de détail (correction du chemin)
+    this.router.navigate(['/admin/announcements', listing.id]);
   }
 
-    // ✅ MÉTHODES DE CALCUL DE TEMPS
+  // ✅ MÉTHODES DE CALCUL DE TEMPS
 
   // Calculer l'âge de l'annonce
   getListingAge(listing: Listing): string {
@@ -290,7 +294,7 @@ export class ListingListComponent implements OnInit {
     const created = new Date(listing.created_at);
     const diffTime = now.getTime() - created.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return 'Aujourd\'hui';
     if (diffDays === 1) return 'Hier';
     if (diffDays < 7) return `${diffDays} jours`;
@@ -299,43 +303,44 @@ export class ListingListComponent implements OnInit {
     return `${Math.floor(diffDays / 365)} ans`;
   }
 
-    // Temps de résolution
+  // Temps de résolution
   getResolutionTime(listing: Listing): string {
     if (!listing.resolved_at) return '';
-    
+
     const created = new Date(listing.created_at);
     const resolved = new Date(listing.resolved_at);
     const diffTime = resolved.getTime() - created.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return 'le jour même';
     if (diffDays === 1) return 'en 1 jour';
     return `en ${diffDays} jours`;
   }
 
-    // Vérifier si mise à jour récente
+  // Vérifier si mise à jour récente
   isRecentlyUpdated(listing: Listing): boolean {
     const updated = new Date(listing.updated_at);
     const created = new Date(listing.created_at);
     return updated.getTime() !== created.getTime();
   }
 
-    // Avertissement archivage automatique (6 mois selon règles)
+  // Avertissement archivage automatique (6 mois selon règles)
   shouldShowArchiveWarning(listing: Listing): boolean {
     if (listing.status !== ListingStatus.ACTIVE) return false;
-    
+
     const now = new Date();
     const created = new Date(listing.created_at);
     const diffTime = now.getTime() - created.getTime();
     const diffMonths = diffTime / (1000 * 60 * 60 * 24 * 30);
-    
+
     return diffMonths >= 5.5; // Avertir à 5.5 mois
   }
 
-    // Vérifier si l'utilisateur est l'auteur de l'annonce
+  // Vérifier si l'utilisateur est l'auteur de l'annonce
   private isListingAuthor(listing: Listing): boolean {
     const currentUser = this.authService.getCurrentUser();
-    return currentUser ? Number(currentUser.id) === listing.user_id : false;
+    // listing.user_id et currentUser.id sont des string
+    return currentUser ? currentUser.id === listing.user_id : false;
   }
   // ✅ Utilitaires
   formatDate(date: Date | string): string {
