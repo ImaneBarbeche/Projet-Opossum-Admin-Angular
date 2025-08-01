@@ -66,7 +66,7 @@ export class ListingListComponent implements OnInit {
     }
     // Catégorie
     if (this.selectedCategory() !== 'ALL') {
-      result = result.filter(l => l.category === this.selectedCategory());
+      result = result.filter(l => this.normalizeCategory(l.category) === this.selectedCategory());
     }
     // Archivées/supprimées (admin)
     if (!this.includeArchived()) {
