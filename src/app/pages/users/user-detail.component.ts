@@ -1,5 +1,6 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,6 +22,7 @@ interface Activity {
   styleUrls: ['./user-detail.component.css']
 })
 export class UserDetailComponent implements OnInit {
+  private readonly snackBar = inject(MatSnackBar);
   user: User | null = null;
   loading = true;
   recentActivity: Activity[] = [];
@@ -108,23 +110,21 @@ export class UserDetailComponent implements OnInit {
     if (!this.user) return;
 
     if (this.isUserBlocked()) {
-      // Débloquer l'utilisateur avec prompt de confirmation
-      const confirmUnblock = confirm('Voulez-vous vraiment débloquer cet utilisateur ?');
-      if (!confirmUnblock) return;
-      // Endpoint: PATCH /api/v1/admin/users/:id/unblock
+      // Toast d'information à la place du confirm
+      this.snackBar.open('Déblocage en cours...', '', { duration: 1500 });
       this.userService.unblockUser(this.user.id).subscribe({
         next: () => {
           this.loadUser(String(this.user!.id));
-          alert('✅ Utilisateur débloqué avec succès');
+          this.snackBar.open('✅ Utilisateur débloqué avec succès', 'Fermer', { duration: 3000 });
         },
         error: (error) => {
           console.error('Erreur lors du déblocage:', error);
           if (error.status === 401) {
-            alert('❌ Non authentifié - Reconnectez-vous');
+            this.snackBar.open('❌ Non authentifié - Reconnectez-vous', 'Fermer', { duration: 3000 });
           } else if (error.status === 403) {
-            alert('❌ Vous n\'avez pas les droits pour cette action');
+            this.snackBar.open('❌ Vous n\'avez pas les droits pour cette action', 'Fermer', { duration: 3000 });
           } else {
-            alert('❌ Erreur lors du déblocage: ' + (error.error?.message || error.message));
+            this.snackBar.open('❌ Erreur lors du déblocage: ' + (error.error?.message || error.message), 'Fermer', { duration: 3000 });
           }
         }
       });
@@ -145,25 +145,25 @@ export class UserDetailComponent implements OnInit {
         alert('Veuillez entrer un nombre de jours valide');
         return;
       }
-      if (confirm(`Bloquer cet utilisateur pendant ${durationDays} jours ? Motif: ${reason}`)) {
-        // Endpoint: PATCH /api/v1/admin/users/:id/block
-        this.userService.blockUser(this.user.id, durationDays, reason).subscribe({
-          next: () => {
-            this.loadUser(String(this.user!.id));
-            alert('✅ Utilisateur bloqué avec succès');
-          },
-          error: (error) => {
-            console.error('Erreur lors du blocage:', error);
-            if (error.status === 401) {
-              alert('❌ Non authentifié - Reconnectez-vous');
-            } else if (error.status === 403) {
-              alert('❌ Vous n\'avez pas les droits pour cette action');
-            } else {
-              alert('❌ Erreur lors du blocage: ' + (error.error?.message || error.message));
-            }
+      // Toast d'information à la place du confirm
+      this.snackBar.open('Blocage en cours...', '', { duration: 1500 });
+      // Endpoint: PATCH /api/v1/admin/users/:id/block
+      this.userService.blockUser(this.user.id, durationDays, reason).subscribe({
+        next: () => {
+          this.loadUser(String(this.user!.id));
+          this.snackBar.open('✅ Utilisateur bloqué avec succès', 'Fermer', { duration: 3000 });
+        },
+        error: (error) => {
+          console.error('Erreur lors du blocage:', error);
+          if (error.status === 401) {
+            this.snackBar.open('❌ Non authentifié - Reconnectez-vous', 'Fermer', { duration: 3000 });
+          } else if (error.status === 403) {
+            this.snackBar.open('❌ Vous n\'avez pas les droits pour cette action', 'Fermer', { duration: 3000 });
+          } else {
+            this.snackBar.open('❌ Erreur lors du blocage: ' + (error.error?.message || error.message), 'Fermer', { duration: 3000 });
           }
-        });
-      }
+        }
+      });
       return;
     }
 
@@ -173,19 +173,18 @@ export class UserDetailComponent implements OnInit {
   deleteUser(): void {
     if (!this.user) return;
 
-    if (confirm('Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ? Cette action est irréversible.')) {
-      // Endpoint: DELETE /api/v1/admin/users/:id
-      this.userService.deleteUser(this.user.id).subscribe({
-        next: () => {
-          alert('Utilisateur supprimé avec succès');
-          this.router.navigate(['/users']);
-        },
-        error: (error) => {
-          console.error('Erreur lors de la suppression:', error);
-          alert('Une erreur est survenue lors de la suppression');
-        }
-      });
-    }
+    this.snackBar.open('Suppression en cours...', '', { duration: 1500 });
+    // Endpoint: DELETE /api/v1/admin/users/:id
+    this.userService.deleteUser(this.user.id).subscribe({
+      next: () => {
+        this.snackBar.open('✅ Utilisateur supprimé avec succès', 'Fermer', { duration: 3000 });
+        this.router.navigate(['/users']);
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression:', error);
+        this.snackBar.open('❌ Une erreur est survenue lors de la suppression', 'Fermer', { duration: 3000 });
+      }
+    });
   }
 
 

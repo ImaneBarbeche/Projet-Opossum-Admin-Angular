@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -44,6 +45,7 @@ export class UserListComponent implements OnInit {
   activeUsers = 0;
   blockedUsers = 0;
 
+  private readonly snackBar = inject(MatSnackBar);
   constructor(
     private readonly userService: UserService,
     private readonly router: Router
@@ -140,78 +142,90 @@ export class UserListComponent implements OnInit {
   }
 
   blockUser(userId: string): void {
-    if (confirm('Êtes-vous sûr de vouloir bloquer cet utilisateur ?')) {
-      const reason = prompt('Motif du blocage ?', '');
-      if (!reason || reason.trim().length === 0) {
-        alert('Veuillez entrer un motif de blocage.');
-        return;
-      }
-      const durationStr = prompt('Durée du blocage en jours ?', '7');
-      const durationDays = durationStr ? parseInt(durationStr, 10) : 7;
-      if (isNaN(durationDays) || durationDays <= 0) {
-        alert('Veuillez entrer une durée valide (nombre de jours).');
-        return;
-      }
-      this.userService.blockUser(userId, durationDays, reason).subscribe({
-        next: () => {
-          alert('✅ Utilisateur bloqué avec succès');
-          this.loadUsers();
-        },
-        error: (error) => {
-          console.error('Erreur lors du blocage:', error);
-          if (error.status === 401) {
-            alert('❌ Non authentifié - Reconnectez-vous');
-          } else if (error.status === 403) {
-            alert('❌ Vous n\'avez pas les droits pour cette action');
-          } else if (error.status === 404) {
-            alert('❌ Utilisateur non trouvé');
-          } else {
-            alert('❌ Erreur lors du blocage: ' + (error.error?.message || error.message));
-          }
-        }
-      });
+    // Toast d'information à la place du confirm
+    this.snackBar.open('Blocage en cours...', '', { duration: 1500 });
+    const reason = prompt('Motif du blocage ?', '');
+    if (!reason || reason.trim().length === 0) {
+      this.snackBar.open('Veuillez entrer un motif de blocage.', 'Fermer', { duration: 3000 });
+      return;
     }
+    const durationStr = prompt('Durée du blocage en jours ?', '7');
+    const durationDays = durationStr ? parseInt(durationStr, 10) : 7;
+    if (isNaN(durationDays) || durationDays <= 0) {
+      this.snackBar.open('Veuillez entrer une durée valide (nombre de jours).', 'Fermer', { duration: 3000 });
+      return;
+    }
+    this.userService.blockUser(userId, durationDays, reason).subscribe({
+      next: () => {
+        this.snackBar.open('✅ Utilisateur bloqué avec succès', 'Fermer', { duration: 3000 });
+        this.loadUsers();
+      },
+      error: (error) => {
+        console.error('Erreur lors du blocage:', error);
+        if (error.status === 401) {
+          this.snackBar.open('❌ Non authentifié - Reconnectez-vous', 'Fermer', { duration: 3000 });
+        } else if (error.status === 403) {
+          this.snackBar.open('❌ Vous n\'avez pas les droits pour cette action', 'Fermer', { duration: 3000 });
+        } else if (error.status === 404) {
+          this.snackBar.open('❌ Utilisateur non trouvé', 'Fermer', { duration: 3000 });
+        } else {
+          this.snackBar.open('❌ Erreur lors du blocage: ' + (error.error?.message || error.message), 'Fermer', { duration: 3000 });
+        }
+      }
+    });
   }
 
   unblockUser(userId: string): void {
-    if (confirm('Êtes-vous sûr de vouloir débloquer cet utilisateur ?')) {
-      this.userService.unblockUser(userId).subscribe({
-        next: () => {
-          alert('✅ Utilisateur débloqué avec succès');
-          this.loadUsers();
-        },
-        error: (error) => {
-          console.error('Erreur lors du déblocage:', error);
-          if (error.status === 401) {
-            alert('❌ Non authentifié - Reconnectez-vous');
-          } else if (error.status === 403) {
-            alert('❌ Vous n\'avez pas les droits pour cette action');
-          } else if (error.status === 404) {
-            alert('❌ Utilisateur non trouvé');
-          } else {
-            alert('❌ Erreur lors du déblocage: ' + (error.error?.message || error.message));
-          }
+    this.snackBar.open('Déblocage en cours...', '', { duration: 1500 });
+    this.userService.unblockUser(userId).subscribe({
+      next: () => {
+        this.snackBar.open('✅ Utilisateur débloqué avec succès', 'Fermer', { duration: 3000 });
+        this.loadUsers();
+      },
+      error: (error) => {
+        console.error('Erreur lors du déblocage:', error);
+        if (error.status === 401) {
+          this.snackBar.open('❌ Non authentifié - Reconnectez-vous', 'Fermer', { duration: 3000 });
+        } else if (error.status === 403) {
+          this.snackBar.open('❌ Vous n\'avez pas les droits pour cette action', 'Fermer', { duration: 3000 });
+        } else if (error.status === 404) {
+          this.snackBar.open('❌ Utilisateur non trouvé', 'Fermer', { duration: 3000 });
+        } else {
+          this.snackBar.open('❌ Erreur lors du déblocage: ' + (error.error?.message || error.message), 'Fermer', { duration: 3000 });
         }
-      });
-    }
+      }
+    });
   }
 
   deleteUser(userId: string): void {
-    if (confirm('⚠️ ATTENTION ! Supprimer cet utilisateur est IRRÉVERSIBLE. Continuer ?')) {
-      this.userService.deleteUser(userId).subscribe({
-        next: () => {
-          this.loadUsers();
-        },
-        error: (error) => {
-          console.error('Erreur lors de la suppression:', error);
-        }
-      });
-    }
+    this.snackBar.open('Suppression en cours...', '', { duration: 1500 });
+    this.userService.deleteUser(userId).subscribe({
+      next: () => {
+        this.snackBar.open('✅ Utilisateur supprimé avec succès', 'Fermer', { duration: 3000 });
+        this.loadUsers();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression:', error);
+        this.snackBar.open('❌ Erreur lors de la suppression', 'Fermer', { duration: 3000 });
+      }
+    });
   }
 
   // Utilitaires
+
   getInitials(name: string): string {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  /**
+   * Retourne l'URL de l'avatar si valide, sinon null (pour afficher une image par défaut)
+   */
+  getAvatarUrl(user: User): string | null {
+    if (!user.avatar) return null;
+    // Si l'avatar commence par file:// ou n'est pas http(s), on refuse
+    if (user.avatar.startsWith('file://')) return null;
+    if (!/^https?:\/\//.test(user.avatar)) return null;
+    return user.avatar;
   }
 
   getFullName(user: User): string {
