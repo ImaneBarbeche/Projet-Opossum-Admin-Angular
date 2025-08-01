@@ -4,6 +4,7 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { UserListComponent } from './pages/users/user-list.component';
 import { UserDetailComponent } from './pages/users/user-detail.component';
 import { ListingListComponent } from './pages/listing/listingList.component';
+import { ListingDetailComponent } from './pages/listing/listing-detail.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -33,6 +34,11 @@ export const routes: Routes = [
   { 
     path: 'annonces', 
     component: ListingListComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'annonces/:id', 
+    component: ListingDetailComponent,
     canActivate: [AuthGuard]
   },
   

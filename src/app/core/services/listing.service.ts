@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Listing, ListingFilters, ListingResponse, ListingStatus } from '../models/listing.model';
+import { Listing, ListingFilters, ListingResponse, ListingStatus, ListingDetail } from '../models/listing.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ListingService {
-  private apiUrl = `${environment.apiUrl}/admin/announcements`;
+  private apiUrl = `${environment.apiUrl}/listings`;
 
   constructor(private http: HttpClient) {}
 
@@ -40,17 +40,17 @@ export class ListingService {
       }
     }
 
-    return this.http.get<ListingResponse>(this.apiUrl, { 
+    return this.http.get<ListingResponse>(`${this.apiUrl}/all`, { 
       params,
       withCredentials: true 
     });
   }
 
-  // Récupérer une annonce par ID
-  getListingById(id: number): Observable<Listing> {
-    return this.http.get<Listing>(`${this.apiUrl}/${id}`, {
+  // Récupérer une annonce par ID (id string/UUID)
+  getListingById(id: string): Observable<ListingDetail> {
+    return this.http.get<{ data: ListingDetail }>(`${this.apiUrl}/${id}`, {
       withCredentials: true
-    });
+    }).pipe(map(res => res.data));
   }
 
   // Bloquer une annonce

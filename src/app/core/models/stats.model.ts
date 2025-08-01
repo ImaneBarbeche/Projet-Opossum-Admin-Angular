@@ -1,21 +1,23 @@
-// 📊 Statistiques dashboard admin Opossum
+// 📊 Statistiques dashboard admin Opossum - Structure conforme API backend
 export interface DashboardStats {
-  // 👥 Statistiques utilisateurs
-  totalUsers: number;
-  activeUsers: number;
-  newUsersToday: number;
-  newUsersThisMonth: number;
-  
-  // 📦 Statistiques objets perdus/trouvés
-  totalListings: number;
-  activeLostItems: number;      // Objets perdus non résolus
-  activeFoundItems: number;     // Objets trouvés non réclamés
-  resolvedToday: number;        // Réunions réussies aujourd'hui
-  resolvedThisMonth: number;    // Réunions réussies ce mois
-  pendingListings: number;      // En attente de validation
-  
-  // 📈 Indicateurs de performance
-  resolutionRate: number;       // % d'objets effectivement retrouvés
+  users: {
+    total: number;
+    active: number;
+    newThisMonth: number;
+  };
+  announcements: {
+    total: number;
+    active: number;
+    lost: number;
+    found: number;
+    resolved: number;
+  };
+  files: {
+    totalCount: number;
+    activeCount: number;
+    totalSize: string;
+  };
+  resolutionRate: number;
 }
 
 // 📅 Évolution dans le temps (pour graphiques)
@@ -53,4 +55,38 @@ export interface QuickStats {
   changeType: 'increase' | 'decrease' | 'stable';
   icon: string;                // "users", "package", "check"
   color: 'success' | 'warning' | 'danger' | 'info';
+}
+
+// 👥 Utilisateur récent pour dashboard
+export interface RecentUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  createdAt: string;
+  avatar?: string;
+  role: string;
+}
+
+// 📦 Annonce récente pour dashboard
+export interface RecentListing {
+  id: number;
+  title: string;
+  type: 'LOST' | 'FOUND';
+  category: string;
+  city: string;
+  createdAt: string;
+  status: string;
+  userName: string;
+}
+
+// 🎯 Action admin récente
+export interface RecentAction {
+  id: number;
+  type: 'USER_BLOCKED' | 'LISTING_ARCHIVED' | 'LISTING_DELETED' | 'USER_UNBLOCKED';
+  description: string;
+  adminName: string;
+  targetType: 'user' | 'listing';
+  targetId: number;
+  createdAt: string;
 }

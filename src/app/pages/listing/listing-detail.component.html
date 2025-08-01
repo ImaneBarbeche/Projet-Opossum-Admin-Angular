@@ -1,0 +1,89 @@
+
+<div class="listing-detail-wrapper">
+  <button class="btn btn-secondary btn-back" (click)="goBack()">
+    <span class="back-icon">←</span>
+    Retour aux annonces
+  </button>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <span class="loading-spinner"></span>
+      Chargement...
+    </div>
+  }
+  @if (error) {
+    <div class="error-state">{{ error }}</div>
+  }
+  @if (!isLoading && !error && listing) {
+    <div class="listing-detail-card status-{{ listing.status.toLowerCase() }}">
+      <div class="detail-header">
+        <h2 class="listing-title">{{ listing.title }}</h2>
+        <div class="card-badges">
+          <span class="badge status-badge {{ 'status-badge ' + listing.status.toLowerCase() }}">
+            @if (listing.status === ListingStatus.RESOLVED) {
+              🎉 RETROUVÉ
+            } @else {
+              {{ listing.status }}
+            }
+          </span>
+          <span class="badge type-badge">{{ listing.type }}</span>
+          <span class="badge category-badge">{{ listing.category }}</span>
+        </div>
+      </div>
+
+      <div class="detail-content">
+        @if (listing.photoUrl) {
+          <img [src]="listing.photoUrl" [alt]="listing.title" class="listing-image" />
+        }
+        @if (listing.imageUrls && listing.imageUrls.length) {
+          <div class="listing-images">
+            @for (img of listing.imageUrls; track img) {
+              <img [src]="img" [alt]="listing.title" class="listing-image" />
+            }
+          </div>
+        }
+        <div class="listing-description">
+          <p>{{ listing.description }}</p>
+        </div>
+        <div class="listing-meta">
+          <div class="meta-item">
+            <strong>Contact :</strong>
+            @if (listing.contactInfo.email) {
+              <span>📧 {{ listing.contactInfo.email }}</span>
+            }
+            @if (listing.contactInfo.phone) {
+              <span class="phone">| 📞 {{ listing.contactInfo.phone }}</span>
+            }
+          </div>
+          <div class="meta-item">
+            <strong>Lieu :</strong>
+            @if (listing.location.address) {
+              <span>{{ listing.location.address }}</span>
+            }
+            @if (listing.location.city) {
+              <span>, {{ listing.location.city }}</span>
+            }
+            @if (listing.location.latitude && listing.location.longitude) {
+              <span> ({{ listing.location.latitude }}, {{ listing.location.longitude }})</span>
+            }
+          </div>
+          <div class="meta-item">
+            <strong>Auteur :</strong>
+            @if (listing.user.avatar) {
+              <img [src]="listing.user.avatar" [alt]="listing.user.firstName" width="32" height="32" class="user-avatar" />
+            }
+            @if (listing.user.firstName || listing.user.lastName) {
+              <span>{{ listing.user.firstName }} {{ listing.user.lastName }}</span>
+            }
+          </div>
+          <div class="meta-item">
+            <strong>Créée :</strong> {{ listing.createdAt | date:'short' }}
+            @if (listing.resolvedAt) {
+              <span class="resolved-info">| <strong>Résolue :</strong> {{ listing.resolvedAt | date:'short' }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

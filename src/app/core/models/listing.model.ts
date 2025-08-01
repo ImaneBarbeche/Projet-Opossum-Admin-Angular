@@ -1,3 +1,35 @@
+// Interface conforme au détail d'annonce backend
+export interface ListingDetail {
+  id: string;
+  title: string;
+  description: string;
+  category: 'ELECTRONICS' | 'CLOTHING' | 'ACCESSORIES' | 'DOCUMENTS' | 'KEYS' | 'BAGS' | 'JEWELRY' | 'PETS' | 'OTHER';
+  type: 'LOST' | 'FOUND';
+  status: 'ACTIVE' | 'RESOLVED' | 'ARCHIVED' | 'DELETED' | 'REJECTED' | 'PENDING';
+  location: {
+    latitude: number | null;
+    longitude: number | null;
+    address: string | null;
+    city: string | null;
+  };
+  imageUrls: string[];
+  photoUrl: string | null;
+  thumbnailUrl: string | null;
+  contactInfo: {
+    phone: string | null;
+    email: string | null;
+  };
+  user: {
+    id: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    avatar: string | null;
+    createdAt: string | null;
+  };
+  createdAt: string | null;
+  updatedAt: string | null;
+  resolvedAt?: string | null;
+}
 // Enums : valeurs fixes autorisées
 export enum ListingStatus {
   ACTIVE = 'ACTIVE',
@@ -25,12 +57,12 @@ export enum ListingCategory {
   OTHER = 'OTHER'
 }
 
-// Interface : structure exacte de nos objets
+// Interface : structure exacte de nos objets Listing
 export interface Listing {
-  id: number;
+  id: string; // toujours string (même si backend number)
   title: string;
   description: string;
-  user_id: number;
+  user_id: string; // string pour cohérence Angular (même si backend number)
   address: string;
   city: string;
   latitude?: number;
@@ -38,17 +70,17 @@ export interface Listing {
   contact_email: string;
   contact_phone?: string;
   photo_url?: string;
-  category: ListingCategory;  
+  images?: string[]; // Ajout pour compatibilité mock
+  category: ListingCategory;
   type: ListingType;
   status: ListingStatus;
   is_lost: boolean;
-  resolved_at?: Date;
-  created_at: Date;
-  updated_at: Date;
-  
+  resolved_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-// Interface pour les filtres
+// Interface pour les filtres de recherche
 export interface ListingFilters {
   status?: ListingStatus | 'ALL';
   type?: ListingType | 'ALL';
@@ -61,10 +93,14 @@ export interface ListingFilters {
   offset?: number;
 }
 
-// Interface pour les réponses API
+// Interface pour la réponse API attendue
 export interface ListingResponse {
-  listings: Listing[];
-  total: number;
-  page: number;
-  limit: number;
+  data: {
+    listings: Listing[];
+    total: number;
+    page: number;
+    limit: number;
+  };
+  success: boolean;
+  timestamp: string;
 }

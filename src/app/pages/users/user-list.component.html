@@ -51,9 +51,12 @@
       @for (user of filteredUsers; track user.id) {
         <div class="user-card" [class.blocked]="!user.active">
           <div class="user-avatar">
-            @if (user.avatar) {
-              <img [src]="user.avatar" [alt]="user.firstName && user.lastName ? (user.firstName + ' ' + user.lastName) : 'Avatar utilisateur'" />
-            } @else {
+            @if (getAvatarUrl(user)) {
+              <img [src]="getAvatarUrl(user)" [alt]="user.firstName && user.lastName ? (user.firstName + ' ' + user.lastName) : 'Avatar utilisateur'" />
+            } 
+            @else {
+              <!-- Image par défaut ou initiales -->
+              <!-- <img src="logo.png" alt="Avatar par défaut" class="avatar-default" /> -->
               <div class="avatar-placeholder" aria-label="Avatar utilisateur">{{ getInitials(user.firstName + ' ' + user.lastName) }}</div>
             }
           </div>

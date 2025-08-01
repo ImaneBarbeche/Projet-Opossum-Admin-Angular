@@ -1,10 +1,10 @@
-@if (isLoading) {
+@if (isLoading()) {
   <div class="loading-container">
     <p>Chargement du tableau de bord...</p>
   </div>
-} @else if (stats) {
+} @else if (stats()) {
   <div class="dashboard-container">
-    <!-- 👋 Encadré d'accueil admin -->
+    <!-- Encadré d'accueil admin -->
     <div class="welcome-card">
       <h2>🌟 Bienvenue dans l'Espace Administrateur <strong>Retrouv'It</strong></h2>
       <p class="welcome-text">
@@ -24,16 +24,25 @@
       </p>
     </div>
 
-    <h1 class="dashboard-title">Tableau de bord</h1>
+    <h1 class="dashboard-title">📊 Tableau de bord</h1>
     
-    <!-- Cards de statistiques -->
+    <!-- Statistiques principales -->
     <div class="stats-grid">
       <div class="stat-card users-card">
         <div class="stat-icon">👥</div>
         <div class="stat-content">
           <h3>Utilisateurs</h3>
-          <p class="stat-number">{{ stats.totalUsers }}</p>
-          <span class="stat-label">inscrits</span>
+          <p class="stat-number">{{ totalUsers() }}</p>
+          <span class="stat-label"> inscrits</span>
+        </div>
+      </div>
+
+      <div class="stat-card active-users-card">
+        <div class="stat-icon">🟢</div>
+        <div class="stat-content">
+          <h3>Utilisateurs actifs</h3>
+          <p class="stat-number">{{ activeUsers() }}</p>
+          <span class="stat-label"> en ligne</span>
         </div>
       </div>
 
@@ -41,51 +50,85 @@
         <div class="stat-icon">📦</div>
         <div class="stat-content">
           <h3>Annonces</h3>
-          <p class="stat-number">{{ stats.totalListings }}</p>
+          <p class="stat-number">{{ totalAnnouncements() }}</p>
           <span class="stat-label">publiées</span>
+          <div class="stat-meta">{{ activeAnnouncements() }} actives</div>
         </div>
       </div>
 
-      <div class="stat-card found-card">
-        <div class="stat-icon">✅</div>
-        <div class="stat-content">
-          <h3>Objets retrouvés</h3>
-          <p class="stat-number">{{ stats.resolvedThisMonth }}</p>
-          <span class="stat-label">ce mois</span>
-        </div>
-      </div>
-
-      <div class="stat-card revenue-card">
-        <div class="stat-icon">�</div>
+      <div class="stat-card resolution-card">
+        <div class="stat-icon">🎯</div>
         <div class="stat-content">
           <h3>Taux de résolution</h3>
-          <p class="stat-number">{{ stats.resolutionRate }}%</p>
-          <span class="stat-label">de succès</span>
+          <p class="stat-number">{{ resolutionRate() }}%</p>
+          <span class="stat-label"> de succès</span>
         </div>
       </div>
     </div>
 
-    <!-- Section activité récente -->
-    <div class="recent-activity">
-      <h2>Activité récente</h2>
+    <!-- Statistiques d'activité -->
+    <div class="activity-section">
+      <h2>� Activité récente</h2>
+      
       <div class="activity-grid">
         <div class="activity-card">
-          <h3>Nouvelles inscriptions</h3>
-          <p class="activity-number">{{ stats.newUsersThisMonth }}</p>
-          <span class="activity-period">ce mois</span>
+          <h3>🆕 Nouveaux utilisateurs</h3>
+          <div class="activity-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ newUsersThisMonth() }}</span>
+              <span class="stat-period"> aujourd'hui</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ newUsersThisMonth() }}</span>
+              <span class="stat-period"> ce mois</span>
+            </div>
+          </div>
         </div>
         
         <div class="activity-card">
-          <h3>Annonces en attente</h3>
-          <p class="activity-number">{{ stats.pendingListings }}</p>
-          <span class="activity-period">à valider</span>
+          <h3>🔍 Objets en cours</h3>
+          <div class="activity-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ lostItems() }}</span>
+              <span class="stat-period"> perdus</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ foundItems() }}</span>
+              <span class="stat-period"> trouvés</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card">
+          <h3>✅ Objets retrouvés</h3>
+          <div class="activity-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ resolvedItems() }}</span>
+              <span class="stat-period"> résolus</span>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="activity-card">
+          <h3>📁 Fichiers</h3>
+          <div class="activity-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ totalFiles() }}</span>
+              <span class="stat-period"> fichiers</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ totalFileSize() }}</span>
+              <span class="stat-period"> taille totale</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 } @else {
   <div class="error-container">
-    <p>❌ Erreur de chargement des statistiques</p>
-    <button class="retry-btn" (click)="ngOnInit()">Réessayer</button>
+    <p>❌ {{ error || 'Erreur de chargement des statistiques' }}</p>
+    <button class="retry-btn" (click)="loadStats()">🔄 Réessayer</button>
   </div>
 }

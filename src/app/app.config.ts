@@ -13,11 +13,6 @@ export const appConfig: ApplicationConfig = {
       (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
         const interceptor = new AuthInterceptor();
         return interceptor.intercept(req, { handle: next });
-      },
-      // Interceptor Mock pour dev
-      (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
-        const interceptor = new MockInterceptor();
-        return interceptor.intercept(req, { handle: next });
       }
     ]))
   ]
