@@ -195,7 +195,8 @@
               </span>
               
               <span class="category-badge">
-                {{ getCategoryIcon(listing.category) }} {{ getCategoryLabel(listing.category) }}
+                {{ getCategoryIcon(normalizeCategory(listing.category)) }}
+                {{ getCategoryLabel(normalizeCategory(listing.category)) }}
               </span>
             </div>
             

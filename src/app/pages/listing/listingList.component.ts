@@ -218,6 +218,7 @@ export class ListingListComponent implements OnInit {
   }
 
   getCategoryLabel(category: ListingCategory): string {
+      console.log('Catégorie reçue pour le badge:', category);
     switch (category) {
       case ListingCategory.ELECTRONICS: return 'Électronique';
       case ListingCategory.CLOTHING: return 'Vêtements';
@@ -379,5 +380,25 @@ export class ListingListComponent implements OnInit {
   // ✅ Utilitaires
   formatDate(date: Date | string): string {
     return new Date(date).toLocaleDateString('fr-FR');
+  }
+  // Normaliser la catégorie (string venant de l'API ou d'une source externe)
+  public normalizeCategory(category: string): ListingCategory {
+    switch (category?.toUpperCase()) {
+      case 'ELECTRONICS': return ListingCategory.ELECTRONICS;
+      case 'CLOTHING': return ListingCategory.CLOTHING;
+      case 'ACCESSORIES': return ListingCategory.ACCESSORIES;
+      case 'DOCUMENTS': return ListingCategory.DOCUMENTS;
+      case 'KEYS': return ListingCategory.KEYS;
+      case 'BAGS': return ListingCategory.BAGS;
+      case 'JEWELRY': return ListingCategory.JEWELRY;
+      case 'PETS': return ListingCategory.PETS;
+      case 'OTHER': return ListingCategory.OTHER;
+      case 'ACCESSOIRES': return ListingCategory.ACCESSORIES;
+      case 'BAGAGES': return ListingCategory.BAGS;
+      case 'BIJOUX': return ListingCategory.JEWELRY;
+      case 'ÉLECTRONIQUE': return ListingCategory.ELECTRONICS;
+      case 'VÊTEMENTS': return ListingCategory.CLOTHING;
+      default: return ListingCategory.OTHER;
+    }
   }
 }
