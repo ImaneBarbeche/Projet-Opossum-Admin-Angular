@@ -23,8 +23,6 @@ interface Activity {
 export class UserDetailComponent implements OnInit {
   user: User | null = null;
   loading = true;
-  // editMode = false;
-  // editForm: Partial<User> = {};
   recentActivity: Activity[] = [];
 
   constructor(

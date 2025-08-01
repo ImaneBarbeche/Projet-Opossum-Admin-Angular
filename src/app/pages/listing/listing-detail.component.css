@@ -1,0 +1,186 @@
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  background: #f8f9fa;
+  color: #3498db;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  padding: 8px 20px;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.06);
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.btn-back:hover {
+  background: #eaf3fa;
+  color: #217dbb;
+  border-color: #217dbb;
+}
+.back-icon {
+  font-size: 20px;
+  margin-right: 2px;
+  display: flex;
+  align-items: center;
+}
+
+/* === Harmonisation avec la liste des annonces === */
+.listing-detail-wrapper {
+  max-width: 700px;
+  margin: 32px auto;
+  padding: 0 8px;
+}
+.listing-detail-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+  padding: 32px 24px 24px 24px;
+  margin-bottom: 24px;
+  border-left: 6px solid #3498db;
+  transition: box-shadow 0.2s;
+}
+.listing-detail-card.status-resolved {
+  border-left-color: #27ae60;
+}
+.listing-detail-card.status-archived {
+  border-left-color: #e67e22;
+  opacity: 0.8;
+}
+.listing-detail-card.status-deleted {
+  border-left-color: #e74c3c;
+  opacity: 0.6;
+}
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.listing-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+.card-badges {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  background: #f3f3f3;
+  color: #5a6c7d;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.status-badge.active {
+  background: #d5f5d5;
+  color: #27ae60;
+}
+.status-badge.resolved {
+  background: #eafaf1;
+  color: #27ae60;
+}
+.status-badge.archived {
+  background: #fbeedb;
+  color: #e67e22;
+}
+.status-badge.deleted {
+  background: #fdeaea;
+  color: #e74c3c;
+}
+.type-badge {
+  background: #eaf3fa;
+  color: #3498db;
+}
+.category-badge {
+  background: #f8f9fa;
+  color: #7f8c8d;
+}
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.listing-image {
+  width: 100%;
+  max-width: 350px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: block;
+  background: #f3f3f3;
+}
+.listing-images {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.listing-description {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 0;
+}
+.listing-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+  color: #7f8c8d;
+}
+.meta-item {
+  margin-bottom: 2px;
+}
+.user-avatar {
+  border-radius: 50%;
+  vertical-align: middle;
+  width: 32px;
+  height: 32px;
+  margin-right: 6px;
+}
+.resolved-info strong {
+  color: #27ae60;
+}
+.phone {
+  color: #3498db;
+  margin-left: 4px;
+}
+.loading-state, .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 180px;
+  color: #7f8c8d;
+  font-size: 18px;
+}
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.btn.btn-secondary {
+  margin-bottom: 18px;
+}
+@media (max-width: 700px) {
+  .listing-detail-card {
+    padding: 16px 6px 12px 6px;
+  }
+  .listing-detail-wrapper {
+    padding: 0 2px;
+  }
+}

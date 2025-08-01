@@ -33,10 +33,10 @@ export class ListingListComponent implements OnInit {
   readonly ListingCategory = ListingCategory;
 
 
+
   listings = signal<Listing[]>([]);
   isLoading = signal(false);
   error = signal<string | null>(null);
-
 
   searchTerm = signal('');
   selectedStatus = signal<ListingStatus | 'ALL'>('ALL');
@@ -44,6 +44,39 @@ export class ListingListComponent implements OnInit {
   selectedCategory = signal<ListingCategory | 'ALL'>('ALL');
   includeArchived = signal(false);
   includeDeleted = signal(false);
+
+  // Liste filtrée côté client (recherche, statuts, type, catégorie)
+  filteredListings = computed(() => {
+    let result = this.listings();
+    // Filtrage recherche texte (titre, description)
+    const search = this.searchTerm().toLowerCase().trim();
+    if (search) {
+      result = result.filter(l =>
+        (l.title && l.title.toLowerCase().includes(search)) ||
+        (l.description && l.description.toLowerCase().includes(search))
+      );
+    }
+    // Statut
+    if (this.selectedStatus() !== 'ALL') {
+      result = result.filter(l => l.status === this.selectedStatus());
+    }
+    // Type
+    if (this.selectedType() !== 'ALL') {
+      result = result.filter(l => l.type === this.selectedType());
+    }
+    // Catégorie
+    if (this.selectedCategory() !== 'ALL') {
+      result = result.filter(l => l.category === this.selectedCategory());
+    }
+    // Archivées/supprimées (admin)
+    if (!this.includeArchived()) {
+      result = result.filter(l => l.status !== ListingStatus.ARCHIVED);
+    }
+    if (!this.includeDeleted()) {
+      result = result.filter(l => l.status !== ListingStatus.DELETED);
+    }
+    return result;
+  });
 
 
   stats = computed(() => {
@@ -100,8 +133,7 @@ export class ListingListComponent implements OnInit {
   onSearchChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm.set(target.value);
-    // Optionnel: recherche en temps réel
-    // this.loadListings();
+    // Pas de rechargement API à chaque frappe, filtrage local
   }
 
   onStatusChange(event: Event): void {
@@ -281,8 +313,11 @@ export class ListingListComponent implements OnInit {
 
   // Voir détails
   viewListingDetails(listing: Listing): void {
-    // Navigation vers la page de détail (correction du chemin)
-    this.router.navigate(['/admin/announcements', listing.id]);
+    // Navigation vers la page de détail : id string (UUID ou nombre)
+    if (listing.id) {
+      this.router.navigate(['/annonces', listing.id]);
+    }
+    // sinon, ne rien faire ou afficher une erreur
   }
 
   // ✅ MÉTHODES DE CALCUL DE TEMPS

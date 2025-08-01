@@ -176,7 +176,7 @@
   <!-- ===== LISTE DES ANNONCES ===== -->
   @if (!isLoading() && !error()) {
     <div class="listings-grid">
-      @for (listing of listings(); track listing.id) {
+      @for (listing of filteredListings(); track listing.id) {
         <div class="listing-card" [class]="'status-' + listing.status.toLowerCase()">
           
           <!-- Header de la card -->

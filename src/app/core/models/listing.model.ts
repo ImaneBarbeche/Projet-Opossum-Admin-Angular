@@ -1,3 +1,35 @@
+// Interface conforme au détail d'annonce backend
+export interface ListingDetail {
+  id: string;
+  title: string;
+  description: string;
+  category: 'ELECTRONICS' | 'CLOTHING' | 'ACCESSORIES' | 'DOCUMENTS' | 'KEYS' | 'BAGS' | 'JEWELRY' | 'PETS' | 'OTHER';
+  type: 'LOST' | 'FOUND';
+  status: 'ACTIVE' | 'RESOLVED' | 'ARCHIVED' | 'DELETED' | 'REJECTED' | 'PENDING';
+  location: {
+    latitude: number | null;
+    longitude: number | null;
+    address: string | null;
+    city: string | null;
+  };
+  imageUrls: string[];
+  photoUrl: string | null;
+  thumbnailUrl: string | null;
+  contactInfo: {
+    phone: string | null;
+    email: string | null;
+  };
+  user: {
+    id: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    avatar: string | null;
+    createdAt: string | null;
+  };
+  createdAt: string | null;
+  updatedAt: string | null;
+  resolvedAt?: string | null;
+}
 // Enums : valeurs fixes autorisées
 export enum ListingStatus {
   ACTIVE = 'ACTIVE',
@@ -38,6 +70,7 @@ export interface Listing {
   contact_email: string;
   contact_phone?: string;
   photo_url?: string;
+  images?: string[]; // Ajout pour compatibilité mock
   category: ListingCategory;
   type: ListingType;
   status: ListingStatus;
