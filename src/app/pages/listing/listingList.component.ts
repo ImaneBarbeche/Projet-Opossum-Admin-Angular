@@ -84,7 +84,6 @@ export class ListingListComponent implements OnInit {
     this.listingService.getAllListings(filters).subscribe({
       next: (response) => {
         console.log('Réponse API', response);
-        console.log('Listings reçus', response.data?.listings);
         this.listings.set(response.data?.listings || []);
         console.log('Signal listings', this.listings());
         this.isLoading.set(false);

@@ -8,7 +8,7 @@ import { Listing, ListingFilters, ListingResponse, ListingStatus } from '../mode
   providedIn: 'root'
 })
 export class ListingService {
-  private apiUrl = `${environment.apiUrl}/admin/announcements`;
+  private apiUrl = `${environment.apiUrl}/listings`;
 
   constructor(private http: HttpClient) {}
 
@@ -40,7 +40,7 @@ export class ListingService {
       }
     }
 
-    return this.http.get<ListingResponse>(this.apiUrl, { 
+    return this.http.get<ListingResponse>(`${this.apiUrl}/all`, { 
       params,
       withCredentials: true 
     });
