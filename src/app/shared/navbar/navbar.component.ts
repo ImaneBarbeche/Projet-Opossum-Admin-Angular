@@ -28,7 +28,6 @@ export class NavbarComponent {
     if (this.isLoggingOut()) return; // Éviter les clics multiples
 
     this.isLoggingOut.set(true);
-    console.log('🚪 Déconnexion en cours...');
 
     this.authService.logout();
   };

@@ -59,13 +59,6 @@ export class UserDetailComponent implements OnInit {
     this.loading = true;
     this.userService.getUserById(id).subscribe({
       next: (user) => {
-        console.log('[UserDetailComponent] user reçu', user);
-        console.log('[UserDetailComponent] Champs:',
-          'active:', user.active,
-          'status:', user.status,
-          'unblockAt:', user.unblockAt,
-          'blockedUntil:', user.blockedUntil
-        );
         this.user = user;
         // Charger l'activité réelle si présente dans la réponse
         if (user.recentActivity && Array.isArray(user.recentActivity)) {

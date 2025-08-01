@@ -43,20 +43,15 @@ export class AuthService {
           // 👇 Gestion du cookie mock si présent
           if ((response as any).setCookie) {
             document.cookie = (response as any).setCookie;
-            console.log('🍪 Cookie mock appliqué:', (response as any).setCookie);
           }
           // 🔑 Stocker le JWT accessToken si présent
           if ((response as any).accessToken) {
             this.accessToken = (response as any).accessToken;
-            console.log('🔑 accessToken reçu et stocké:', this.accessToken);
           }
-          console.log('✅ Utilisateur connecté:', user.email);
         } else {
-          console.log('❌ Réponse login sans user:', response);
         }
       }),
       catchError(error => {
-        console.error('❌ Erreur de connexion:', error);
         return throwError(() => error);
       })
     );
@@ -64,7 +59,6 @@ export class AuthService {
 
   // 🚪 LOGOUT - Appel API pour supprimer le cookie côté serveur
   logout(): void {
-    console.log('🚪 Déconnexion en cours...');
     this.http.post<any>(`${environment.apiUrl}/auth/logout`, {}, {
       withCredentials: true
     }).subscribe({
@@ -72,7 +66,6 @@ export class AuthService {
         // 👇 Gestion du cookie mock si présent
         if (response && response.setCookie) {
           document.cookie = response.setCookie;
-          console.log('🍪 Cookie mock supprimé:', response.setCookie);
         }
         this.completeLogout();
       },
@@ -92,7 +85,6 @@ export class AuthService {
     // 🔧 AJOUT: Nettoyer le sessionStorage
     sessionStorage.removeItem('opossum_user_session');
     
-    console.log('✅ Déconnexion terminée');
     
     // Rediriger vers login si pas déjà sur la page
     if (this.router.url !== '/login') {
@@ -112,7 +104,6 @@ export class AuthService {
 
   // 🔄 INITIALISATION AU DÉMARRAGE - Avec fallback sessionStorage
   initializeAuth(): void {
-    console.log('🔄 Initialisation de l\'authentification via cookies...');
     
     // 🔧 ÉTAPE 1: Vérifier d'abord le sessionStorage (fallback pour le refresh)
     const savedSession = sessionStorage.getItem('opossum_user_session');
@@ -123,7 +114,6 @@ export class AuthService {
         
         // Si la session sauvegardée a moins de 8 heures, on la restaure temporairement
         if (sessionAge < 8 * 60 * 60 * 1000) {
-          console.log('🔄 Session trouvée dans sessionStorage, restauration temporaire...');
           this.currentUserSubject.next(sessionData.user);
         } else {
           sessionStorage.removeItem('opossum_user_session');
@@ -149,9 +139,7 @@ export class AuthService {
             timestamp: Date.now()
           }));
           
-          console.log('✅ Utilisateur reconnecté automatiquement:', response.user.email);
         } else {
-          console.log('ℹ️ Aucune session active côté serveur');
           // Ne pas écraser la session locale si elle existe déjà
           if (!this.currentUserSubject.value) {
             this.currentUserSubject.next(null);
@@ -160,13 +148,11 @@ export class AuthService {
         }
       },
       error: (error) => {
-        console.log('⚠️ Erreur serveur lors de l\'initialisation:', error.status);
         // Si erreur serveur mais session locale valide, on garde la session locale
         if (!this.currentUserSubject.value) {
           this.currentUserSubject.next(null);
           sessionStorage.removeItem('opossum_user_session');
         } else {
-          console.log('🔄 Session locale maintenue malgré l\'erreur serveur');
         }
       }
     });
@@ -179,11 +165,9 @@ export class AuthService {
     }).pipe(
       map(response => {
         if (!response.authenticated) {
-          console.log('❌ Session expirée');
           this.completeLogout();
           return false;
         } else {
-          console.log('✅ Session valide');
           // Mettre à jour l'utilisateur si nécessaire
           if (response.user) {
             this.currentUserSubject.next(response.user);
@@ -192,7 +176,6 @@ export class AuthService {
         }
       }),
       catchError(error => {
-        console.log('❌ Erreur validation session:', error);
         this.completeLogout();
         return of(false); // ✅ CORRECTION: Retourner Observable<boolean>
       })
@@ -210,11 +193,9 @@ export class AuthService {
         this.checkTokenValidity().subscribe({
           next: (isValid) => {
             if (!isValid) {
-              console.log('🔄 Session expirée détectée, déconnexion automatique');
             }
           },
           error: () => {
-            console.log('🔄 Erreur de validation, déconnexion automatique');
           }
         });
       }

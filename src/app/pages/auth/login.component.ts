@@ -59,12 +59,10 @@ export class LoginComponent implements OnInit {
       password: this.loginForm.value.password
     };
 
-    console.log('🔐 Tentative de connexion pour:', loginData.email);
 
     // Appel au service d'authentification
     this.authService.login(loginData.email, loginData.password).subscribe({
       next: (response) => {
-        console.log('✅ Connexion réussie:', response);
         this.isLoading.set(false);
         // Redirection vers le dashboard
         this.router.navigate(['/dashboard']);

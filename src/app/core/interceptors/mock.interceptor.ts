@@ -119,7 +119,6 @@ export class MockInterceptor implements HttpInterceptor {
     }
 
     // 🎭 MODE MOCK ACTIVÉ - Simuler des réponses
-    console.log('🎭 MOCK MODE:', req.method, req.url);
 
     // 🔐 LOGIN - Activer la session mock
     if (url.includes('/auth/login') && method === 'POST') {
@@ -615,7 +614,6 @@ export class MockInterceptor implements HttpInterceptor {
     }
 
     // 🚫 Route non mockée - Passer à la vraie API
-    console.log('⚠️ Route non mockée, passage à la vraie API:', req.url);
     return next.handle(req);
   }
 }

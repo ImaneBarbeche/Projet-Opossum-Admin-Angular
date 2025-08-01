@@ -13,10 +13,8 @@ export class AdminGuard implements CanActivate {
   canActivate(): boolean {
     // 🔍 Vérifier si l'utilisateur est connecté
     if (this.authService.isAuthenticated()) {
-      console.log('✅ Utilisateur authentifié - Accès autorisé');
       return true;
     } else {
-      console.log('❌ Utilisateur non connecté - Redirection vers login');
       this.router.navigate(['/login']);
       return false;
     }

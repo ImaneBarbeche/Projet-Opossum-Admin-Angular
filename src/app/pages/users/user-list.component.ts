@@ -59,13 +59,6 @@ export class UserListComponent implements OnInit {
       next: (users) => {
         // Log détaillé pour chaque utilisateur
         users.forEach(u => {
-          console.log(`[UserList] ${u.firstName} ${u.lastName}`,
-            'status:', u.status,
-            'unblockAt:', u.unblockAt,
-            'blockedUntil:', u.blockedUntil,
-            'active:', u.active,
-            'emailVerified:', u.emailVerified
-          );
         });
         this.users = users;
         this.calculateStats();

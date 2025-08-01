@@ -35,7 +35,6 @@ export class UserService {
       withCredentials: true
     }).pipe(
       map(raw => {
-        console.log('[API user raw]', raw); // DEBUG: log la réponse brute
         return UserHelpers.fromApi(raw.data);
       })
     );
