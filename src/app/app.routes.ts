@@ -6,6 +6,7 @@ import { UserDetailComponent } from './pages/users/user-detail.component';
 import { ListingListComponent } from './pages/listing/listingList.component';
 import { ListingDetailComponent } from './pages/listing/listing-detail.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { MessagesComponent } from './pages/messages/messages';
 
 export const routes: Routes = [
   // 🔐 Route login (publique)
@@ -41,10 +42,18 @@ export const routes: Routes = [
     component: ListingDetailComponent,
     canActivate: [AuthGuard]
   },
+
+    // Route messages
+  {
+  path: 'messages',
+  component: MessagesComponent,
+  canActivate: [AuthGuard]
+},
   
   // 🏠 Redirection par défaut
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   
   // 🚫 Route 404
   { path: '**', redirectTo: '/login' }
+
 ];

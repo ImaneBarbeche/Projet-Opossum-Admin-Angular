@@ -10,48 +10,47 @@
     </div>
 
     <!-- Bouton hamburger (mobile uniquement) -->
-<button class="navbar-toggle" (click)="toggleMenu()" aria-label="Menu mobile">
-  ☰
-</button>
+    <button class="navbar-toggle" (click)="toggleMenu()" aria-label="Menu mobile">
+      ☰
+    </button>
 
 
     <!-- Navigation principale -->
     <div class="navbar-nav" [ngClass]="{ 'open': menuOpen }">
-      <a routerLink="/dashboard" 
-         routerLinkActive="active" 
-         class="nav-link">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
         📊 Dashboard
       </a>
-      <a routerLink="/users" 
-         routerLinkActive="active" 
-         class="nav-link">
+      <a routerLink="/users" routerLinkActive="active" class="nav-link">
         👥 Utilisateurs
       </a>
-      <a routerLink="/annonces" 
-         routerLinkActive="active" 
-         class="nav-link">
+      <a routerLink="/annonces" routerLinkActive="active" class="nav-link">
         📦 Annonces
       </a>
+      <a routerLink="/messages" routerLinkActive="active" class="nav-link">
+        📩 Messages signalés
+      </a>
+
     </div>
+
+
+
+
 
     <!-- Section utilisateur + logout -->
     <div class="navbar-user">
       <!-- Info utilisateur -->
       @if (currentUser()) {
-        <span class="user-info">
-          👋 {{ currentUser()!.firstName }} {{ currentUser()!.lastName }}
-        </span>
+      <span class="user-info">
+        👋 {{ currentUser()!.firstName }} {{ currentUser()!.lastName }}
+      </span>
       }
-      
+
       <!-- Bouton logout -->
-      <button class="logout-btn" 
-              (click)="logout()" 
-              title="Se déconnecter"
-              [disabled]="isLoggingOut()">
+      <button class="logout-btn" (click)="logout()" title="Se déconnecter" [disabled]="isLoggingOut()">
         @if (isLoggingOut()) {
-          <span class="spinner"></span>
+        <span class="spinner"></span>
         } @else {
-          🚪
+        🚪
         }
       </button>
     </div>

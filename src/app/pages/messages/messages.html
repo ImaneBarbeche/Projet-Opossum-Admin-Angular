@@ -1,0 +1,57 @@
+<h2>📩 Messages signalés</h2>
+
+<!-- 🌀 Indicateurs de statut -->
+<div *ngIf="isLoading" class="status loading">Chargement...</div>
+<div *ngIf="success" class="status success">{{ success }}</div>
+<div *ngIf="error" class="status error">{{ error }}</div>
+
+<!-- 🚫 Aucun message signalé -->
+<div *ngIf="!isLoading && reportedMessages.length === 0">
+  Aucun message signalé pour le moment.
+</div>
+
+<!-- ✅ Liste des messages signalés -->
+<div *ngIf="reportedMessages.length > 0" class="message-list">
+  <div *ngFor="let msg of reportedMessages" class="message-card">
+
+    <div class="message-header">
+      <span class="status-tag {{ msg.status.toLowerCase() }}">{{ msg.status }}</span>
+      <span class="author">{{ msg.authorUsername }}</span>
+      <span class="date">{{ msg.createdAt | date:'short' }}</span>
+    </div>
+
+    <p class="content">« {{ msg.content }} »</p>
+    <p class="message">Message: {{ msg.content }}</p>
+
+    <!-- 🛑 Liste des signalements -->
+    <ul class="reports">
+      <li *ngFor="let report of msg.reports">
+        ⚠ {{ report.reason }} – {{ report.reportedByUsername }} ({{ report.createdAt | date:'short' }})
+      </li>
+    </ul>
+
+    <!-- 📜 Historique de modération -->
+    @if (msg.moderationHistory.length > 0) {
+      <div class="history">
+      <strong>Historique modération :</strong>
+      <ul>
+        <li *ngFor="let action of msg.moderationHistory">
+          {{ action.action }} par {{ action.by }} ({{ action.at | date:'short' }})
+        </li>
+      </ul>
+      </div>
+    }
+
+    <!-- 🎮 Actions -->
+    <div class="actions">
+      <button (click)="approve(msg.id)">✅ Approuver</button>
+      <button (click)="archive(msg.id)">🗃 Archiver</button>
+      <button (click)="reject(msg.id)">🗑 Rejeter</button>
+      <button (click)="viewConversation(msg.conversationId)">💬 Voir conversation</button>
+      @if (msg.authorId) {
+        <button (click)="banUser(msg.authorId)">🚫 Bannir</button>
+      }
+      <button (click)="deleteMessage(msg.id)">❌ Supprimer définitivement</button>
+    </div>
+  </div>
+</div>
