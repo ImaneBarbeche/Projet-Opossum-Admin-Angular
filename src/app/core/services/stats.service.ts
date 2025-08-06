@@ -20,7 +20,6 @@ export class StatsService {
       { withCredentials: true }
     ).pipe(
       map((response: DashboardStats) => {
-        console.log('📊 Stats brutes reçues:', response);
         return response;
       })
     );

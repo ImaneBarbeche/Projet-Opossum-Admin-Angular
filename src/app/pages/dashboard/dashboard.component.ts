@@ -52,9 +52,6 @@ export class DashboardComponent implements OnInit {
 
     this.statsService.getDashboardStats().subscribe({
       next: (data) => {
-        console.log('✅ Stats reçues:', data);
-        console.log('📊 Total utilisateurs:', data.users?.total);
-        console.log('📦 Total annonces:', data.announcements?.total);
         this.stats.set(data);
         this.isLoading.set(false);
       },
