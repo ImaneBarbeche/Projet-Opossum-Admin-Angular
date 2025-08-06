@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageService } from 'src/app/core/services/message.service';
 import { ReportedMessage } from 'src/app/core/models/message.model';
-import { Page } from 'src/app/core/models/page.model';
+
 
 @Component({
   selector: 'app-messages',
@@ -37,7 +37,7 @@ export class MessagesComponent implements OnInit {
     this.loadReportedMessages();
   }
 
-    // Basculer entre signalés et archivés
+  // Basculer entre signalés et archivés
   toggleArchived(showArchived: boolean) {
     this.showArchived.set(showArchived);
     this.clearMessages();
@@ -57,9 +57,11 @@ export class MessagesComponent implements OnInit {
     try {
       const messages = await this.messageService.getReportedMessages();
       this.reportedMessages.set(messages);
-    } catch (err) {
-      this.error.set('Erreur lors du chargement des messages signalés');
-      console.error(err);
+      console.log('📩 Messages signalés chargés:', messages.length);
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || 'Erreur lors du chargement des messages signalés';
+      this.error.set(errorMessage);
+      console.error('❌ Erreur loadReportedMessages:', err);
     } finally {
       this.isLoading.set(false);
     }
@@ -73,9 +75,11 @@ export class MessagesComponent implements OnInit {
     try {
       const messages = await this.messageService.getArchivedMessages();
       this.archivedMessages.set(messages);
-    } catch (err) {
-      this.error.set('Erreur lors du chargement des messages archivés');
-      console.error(err);
+      console.log('🗃️ Messages archivés chargés:', messages.length);
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || 'Erreur lors du chargement des messages archivés';
+      this.error.set(errorMessage);
+      console.error('❌ Erreur loadArchivedMessages:', err);
     } finally {
       this.isLoading.set(false);
     }
@@ -88,11 +92,14 @@ export class MessagesComponent implements OnInit {
       this.showSuccess('Message désarchivé avec succès');
       
       // Mettre à jour les listes
-      await this.loadArchivedMessages();
-      await this.loadReportedMessages();
-    } catch (err) {
-      this.error.set('Erreur lors du désarchivage');
-      console.error(err);
+      await Promise.all([
+        this.loadArchivedMessages(),
+        this.loadReportedMessages()
+      ]);
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || 'Erreur lors du désarchivage';
+      this.error.set(errorMessage);
+      console.error('❌ Erreur unarchive:', err);
     }
   }
 
@@ -100,14 +107,15 @@ export class MessagesComponent implements OnInit {
    * ✅ Approuver un message
    */
   async approve(id: string): Promise<void> {
-    this.success.set(null);
+    this.clearMessages();
     try {
       await this.messageService.approveMessage(id);
       this.showSuccess("Message approuvé avec succès.");
       await this.loadReportedMessages();
-    } catch (err) {
-      this.error.set("Erreur lors de l'approbation du message.");
-      console.error(err);
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || "Erreur lors de l'approbation du message.";
+      this.error.set(errorMessage);
+      console.error('❌ Erreur approve:', err);
     }
   }
 
@@ -115,14 +123,15 @@ export class MessagesComponent implements OnInit {
    * 🗃 Archiver un message
    */
   async archive(id: string): Promise<void> {
-    this.success.set(null);
+    this.clearMessages();
     try {
       await this.messageService.archiveMessage(id);
       this.showSuccess("Message archivé.");
       await this.loadReportedMessages();
-    } catch (err) {
-      this.error.set("Erreur lors de l'archivage du message.");
-      console.error(err);
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || "Erreur lors de l'archivage du message.";
+      this.error.set(errorMessage);
+      console.error('❌ Erreur archive:', err);
     }
   }
 
@@ -130,14 +139,15 @@ export class MessagesComponent implements OnInit {
    * 🗑 Rejeter un message
    */
   async reject(id: string): Promise<void> {
-    this.success.set(null);
+    this.clearMessages();
     try {
       await this.messageService.rejectMessage(id);
-      this.showSuccess("Message supprimé.");
+      this.showSuccess("Message rejeté.");
       await this.loadReportedMessages();
-    } catch (err) {
-      this.error.set("Erreur lors de la suppression du message.");
-      console.error(err);
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || "Erreur lors du rejet du message.";
+      this.error.set(errorMessage);
+      console.error('❌ Erreur reject:', err);
     }
   }
 
@@ -145,8 +155,6 @@ export class MessagesComponent implements OnInit {
    * 💬 Voir une conversation complète
    */
   async viewConversation(conversationId: string): Promise<void> {
-    console.log('viewConversation appelé avec:', conversationId);
-    
     if (!conversationId) {
       this.error.set('ID de conversation manquant');
       return;
@@ -156,46 +164,56 @@ export class MessagesComponent implements OnInit {
     this.error.set(null);
     this.selectedConversationId.set(conversationId);
 
-    // Identifier le message signalé
-    const reportedMsg = this.reportedMessages().find(rm => rm.conversationId === conversationId);
-    if (reportedMsg) {
-      this.selectedMessageId.set(reportedMsg.id);
-    }
-
     try {
       const messages = await this.messageService.getConversation(conversationId);
       this.selectedConversation.set(messages);
-    } catch (err) {
-      console.error('Erreur conversation:', err);
-      this.error.set("Impossible de charger la conversation.");
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || "Impossible de charger la conversation.";
+      this.error.set(errorMessage);
+      console.error('❌ Erreur viewConversation:', err);
     } finally {
       this.isLoadingConversation.set(false);
     }
   }
 
-  /**
-   * 🔒 Fermer la modal de conversation
-   */
-  closeConversation(): void {
-    this.selectedConversation.set(null);
-    this.selectedConversationId.set(null);
-    this.selectedMessageId.set(null);
-  }
-
-  /**
+   /**
    * 🚫 Bannir un utilisateur
    */
-  banUser(userId: string): void {
-    console.log(`Bannir utilisateur ${userId}`);
-    // TODO : Implémenter avec adminUserService.banUser(userId)
+  async banUser(userId: string): Promise<void> {
+    try {
+      await this.messageService.banUser(userId);
+      this.showSuccess("Utilisateur banni avec succès.");
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || "Erreur lors du bannissement.";
+      this.error.set(errorMessage);
+      console.error('❌ Erreur banUser:', err);
+    }
   }
 
-  /**
+/**
    * ❌ Supprimer définitivement un message
    */
-  deleteMessage(id: string): void {
-    console.warn("Suppression définitive non encore implémentée.");
-    // TODO : ajouter un endpoint DELETE et l'appeler ici
+  async deleteMessage(id: string): Promise<void> {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer définitivement ce message ?')) {
+      return;
+    }
+
+    this.clearMessages();
+    try {
+      await this.messageService.deleteMessage(id);
+      this.showSuccess("Message supprimé définitivement.");
+      
+      // Recharger la liste appropriée
+      if (this.showArchived()) {
+        await this.loadArchivedMessages();
+      } else {
+        await this.loadReportedMessages();
+      }
+    } catch (err: any) {
+      const errorMessage = err?.error?.message || err?.message || "Erreur lors de la suppression définitive.";
+      this.error.set(errorMessage);
+      console.error('❌ Erreur deleteMessage:', err);
+    }
   }
 
   private clearMessages() {
@@ -207,4 +225,15 @@ export class MessagesComponent implements OnInit {
     this.success.set(message);
     setTimeout(() => this.success.set(null), 3000);
   }
+
+    /**
+   * 🔒 Fermer la modal de conversation
+   */
+  closeConversation(): void {
+    this.selectedConversation.set(null);
+    this.selectedConversationId.set(null);
+    this.selectedMessageId.set(null);
+  }
+
+
 }
