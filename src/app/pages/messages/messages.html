@@ -119,4 +119,48 @@
   </div>
 }
 
-<!-- ...existing code... (modal reste identique) -->
+<!-- 💬 Modal de conversation -->
+@if (selectedConversation()) {
+  <div class="modal-overlay" (click)="closeConversation()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="conversation-info">
+          <h3>💬 Conversation</h3>
+          @if (selectedConversation()) {
+            <div class="conversation-stats">
+              {{ getConversationStats().participants }} participants • {{ getConversationStats().totalMessages }} messages
+            </div>
+          }
+        </div>
+        <button class="close-btn" (click)="closeConversation()">✕ Fermer</button>
+      </div>
+
+      @if (isLoadingConversation()) {
+        <div class="loading-state">Chargement de la conversation...</div>
+      } @else {
+        <div class="messages-container">
+          @if (selectedConversation()!.length === 0) {
+            <div class="no-messages">Aucun message dans cette conversation</div>
+          } @else {
+            @for (message of selectedConversation(); track message.messageId || $index) {
+              <div class="message-bubble" [class.reported]="isReportedMessage(message)">
+                <div class="message-meta">
+                  <strong>{{ getUserDisplayName(message, $index) }}</strong>
+                  <span class="timestamp">{{ message.sentAt || message.createdAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+                  @if (isReportedMessage(message)) {
+                    <span class="reported-badge">🚨 SIGNALÉ</span>
+                  }
+                </div>
+                <p class="message-content">{{ message.content }}</p>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button (click)="closeConversation()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}

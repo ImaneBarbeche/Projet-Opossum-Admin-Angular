@@ -120,7 +120,12 @@ export class MessageService {
       );
       
       console.log('✅ Conversation reçue:', response);
-      return response?.content || [];
+      // Vérifier si c'est une Page ou un array direct
+      if (response && typeof response === 'object' && 'content' in response) {
+        return response.content || [];
+      }
+      // Si c'est déjà un array
+      return Array.isArray(response) ? response : [];
     } catch (error) {
       console.error('❌ Erreur getConversation:', error);
       throw error;

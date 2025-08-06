@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MessageService } from 'src/app/core/services/message.service';
 import { ReportedMessage } from 'src/app/core/models/message.model';
 
@@ -7,7 +7,7 @@ import { ReportedMessage } from 'src/app/core/models/message.model';
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DatePipe],
   templateUrl: './messages.html',
   styleUrls: ['./messages.css']
 })
@@ -23,7 +23,7 @@ export class MessagesComponent implements OnInit {
 
   // Signals pour la modal de conversation
     showArchived = signal(false);
-  selectedConversation = signal<ReportedMessage[] | null>(null);
+  selectedConversation = signal<any[] | null>(null);
   selectedConversationId = signal<string | null>(null);
   selectedMessageId = signal<string | null>(null);
   isLoadingConversation = signal(false);
@@ -155,6 +155,8 @@ export class MessagesComponent implements OnInit {
    * 💬 Voir une conversation complète
    */
   async viewConversation(conversationId: string): Promise<void> {
+    console.log('🔍 viewConversation appelé avec conversationId:', conversationId);
+    
     if (!conversationId) {
       this.error.set('ID de conversation manquant');
       return;
@@ -166,7 +168,10 @@ export class MessagesComponent implements OnInit {
 
     try {
       const messages = await this.messageService.getConversation(conversationId);
+      console.log('🎯 Messages de conversation reçus:', messages);
+      console.log('📝 Nombre de messages:', messages.length);
       this.selectedConversation.set(messages);
+      console.log('✅ selectedConversation mis à jour:', this.selectedConversation());
     } catch (err: any) {
       const errorMessage = err?.error?.message || err?.message || "Impossible de charger la conversation.";
       this.error.set(errorMessage);
@@ -224,6 +229,55 @@ export class MessagesComponent implements OnInit {
   private showSuccess(message: string) {
     this.success.set(message);
     setTimeout(() => this.success.set(null), 3000);
+  }
+
+  /**
+   * 📊 Obtenir les statistiques de la conversation
+   */
+  getConversationStats(): { participants: number; totalMessages: number } {
+    const conversation = this.selectedConversation() || [];
+    const uniqueUserIds = [...new Set(conversation.map(m => m.senderId).filter(Boolean))];
+    
+    return {
+      participants: uniqueUserIds.length,
+      totalMessages: conversation.length
+    };
+  }
+
+  /**
+   * 🏷️ Obtenir un nom d'utilisateur lisible
+   */
+  getUserDisplayName(message: any, index: number): string {
+    if (message.authorUsername) {
+      return message.authorUsername;
+    }
+    
+    if (message.senderId) {
+      // Identifier l'utilisateur unique basé sur le senderId
+      const conversation = this.selectedConversation() || [];
+      const uniqueUserIds = [...new Set(conversation.map(m => m.senderId).filter(Boolean))];
+      const userIndex = uniqueUserIds.indexOf(message.senderId);
+      
+      if (userIndex !== -1) {
+        return `Utilisateur ${userIndex + 1}`;
+      }
+    }
+    
+    return 'Utilisateur anonyme';
+  }
+
+  /**
+   * 🔍 Identifier le message signalé par son contenu
+   */
+  isReportedMessage(message: any): boolean {
+    // Si on a un messageId spécifique du message signalé
+    if (this.selectedMessageId() && message.messageId === this.selectedMessageId()) {
+      return true;
+    }
+    
+    // Sinon, on peut identifier par le contenu si c'est le même que le message original
+    const originalMessage = this.currentMessages().find(m => m.conversationId === this.selectedConversationId());
+    return !!(originalMessage && message.content === originalMessage.content);
   }
 
     /**
