@@ -89,7 +89,7 @@ export class MessageService {
   }
 
    /**
-   * 🗑 Supprimer un message 
+   * 🗑 Supprimer un message (soft delete)
    */
   async deleteMessage(messageId: string): Promise<void> {
     const url = `${this.baseUrl}/${messageId}/moderate/delete`;
