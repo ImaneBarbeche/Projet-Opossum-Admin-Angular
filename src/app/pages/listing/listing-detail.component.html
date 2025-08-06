@@ -32,7 +32,7 @@
     </div>
 
     <!-- Actions admin de modération -->
-    <div class="detail-actions" style="margin-bottom: 1rem;">
+    <div class="detail-actions">
       @if (listing.status !== ListingStatus.ARCHIVED) {
         <button class="btn btn-danger" (click)="blockListing()">🚫 Bloquer l'annonce</button>
       } @else {

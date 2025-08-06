@@ -69,21 +69,23 @@
         <p class="content">« {{ msg.content }} »</p>
 
         <!-- 🛑 Liste des signalements -->
-        <ul class="reports">
-          @for (report of msg.reports; track report.id) {
-            <li>⚠ {{ report.reason }} – {{ report.reportedByUsername }} ({{ report.createdAt | date:'short' }})</li>
-          }
-        </ul>
+        @if (msg.reports && msg.reports.length > 0) {
+          <div class="reports">
+            @for (report of msg.reports; track report.id) {
+              <div class="report-item">⚠ {{ report.reason }} – {{ report.reportedByUsername }} ({{ report.createdAt | date:'short' }})</div>
+            }
+          </div>
+        }
 
         <!-- 📜 Historique de modération -->
         @if (msg.moderationHistory.length > 0) {
           <div class="history">
             <strong>Historique modération :</strong>
-            <ul>
+            <div class="history-list">
               @for (action of msg.moderationHistory; track $index) {
-                <li>{{ action.action }} par {{ action.by }} ({{ action.at | date:'short' }})</li>
+                <div class="history-item">{{ action.action }} par {{ action.by }} ({{ action.at | date:'short' }})</div>
               }
-            </ul>
+            </div>
           </div>
         }
 
