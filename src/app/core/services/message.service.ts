@@ -1,68 +1,102 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
+import { DOCUMENT } from '@angular/common';
 import { ReportedMessage } from '../models/message.model';
-import { Page } from '../models/page.model'; // si tu veux gérer la pagination proprement
+import { Page } from '../models/page.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageService {
-  private baseUrl = `${environment.apiUrl}/admin/messages`;
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/admin/messages`;
 
-  constructor(private http: HttpClient) {}
 
+  /**
+   * 🗃️ Récupérer les messages archivés
+   */
+  async getArchivedMessages(): Promise<ReportedMessage[]> {
+    return firstValueFrom(
+      this.http.get<ReportedMessage[]>(`${this.baseUrl}/archived`, {
+        withCredentials: true
+      })
+    );
+  }
+
+  /**
+   * 📤 Désarchiver un message
+   */
+  async unarchiveMessage(messageId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.patch<void>(`${this.baseUrl}/${messageId}/unarchive`, {}, {
+        withCredentials: true
+      })
+    );
+  }
   /**
    * 📩 Liste des messages signalés
    */
-  getReportedMessages(): Observable<Page<ReportedMessage>> {
-    return this.http.get<Page<ReportedMessage>>(
-      `${this.baseUrl}/moderation/reported`,
-      { withCredentials: true }
+  async getReportedMessages(): Promise<ReportedMessage[]> {
+    const page = await firstValueFrom(
+      this.http.get<Page<ReportedMessage>>(
+        `${this.baseUrl}/moderation/reported`,
+        { withCredentials: true }
+      )
     );
+    return page.content || [];
   }
 
   /**
    * ✅ Approuver un message (ignorer le signalement)
    */
-  approveMessage(messageId: string): Observable<void> {
-    return this.http.post<void>(
-      `${this.baseUrl}/${messageId}/moderate/approve`,
-      {},
-      { withCredentials: true }
+  async approveMessage(messageId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.baseUrl}/${messageId}/moderate/approve`,
+        {},
+        { withCredentials: true }
+      )
     );
   }
 
   /**
    * 🗃 Archiver un message
    */
-  archiveMessage(messageId: string): Observable<void> {
-    return this.http.post<void>(
-      `${this.baseUrl}/${messageId}/moderate/archive`,
-      {},
-      { withCredentials: true }
+  async archiveMessage(messageId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.baseUrl}/${messageId}/moderate/archive`,
+        {},
+        { withCredentials: true }
+      )
     );
   }
 
   /**
    * 🗑 Rejeter un message (suppression)
    */
-  rejectMessage(messageId: string): Observable<void> {
-    return this.http.post<void>(
-      `${this.baseUrl}/${messageId}/moderate/reject`,
-      {},
-      { withCredentials: true }
+  async rejectMessage(messageId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.baseUrl}/${messageId}/moderate/reject`,
+        {},
+        { withCredentials: true }
+      )
     );
   }
 
   /**
    * 💬 Voir une conversation complète
    */
-  getConversation(conversationId: string): Observable<Page<ReportedMessage>> {
-    return this.http.get<Page<ReportedMessage>>(
-      `${this.baseUrl}/conversations/${conversationId}`,
-      { withCredentials: true }
+  async getConversation(conversationId: string): Promise<ReportedMessage[]> {
+    const page = await firstValueFrom(
+      this.http.get<Page<ReportedMessage>>(
+        `${this.baseUrl}/conversations/${conversationId}`,
+        { withCredentials: true }
+      )
     );
+    return page.content || [];
   }
 }

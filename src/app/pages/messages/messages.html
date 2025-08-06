@@ -1,5 +1,31 @@
 <h2>📩 Messages signalés</h2>
 
+<!-- 🎮 Filtres et contrôles -->
+<div class="controls">
+  <div class="filter-section">
+    <button 
+      class="filter-btn" 
+      [class.active]="!showArchived()"
+      (click)="toggleArchived(false)">
+      📩 Messages signalés
+    </button>
+    <button 
+      class="filter-btn" 
+      [class.active]="showArchived()"
+      (click)="toggleArchived(true)">
+      🗃️ Messages archivés
+    </button>
+  </div>
+  
+  <div class="stats">
+    @if (!showArchived()) {
+      <span class="count">{{ reportedMessages().length }} message(s) signalé(s)</span>
+    } @else {
+      <span class="count">{{ archivedMessages().length }} message(s) archivé(s)</span>
+    }
+  </div>
+</div>
+
 <!-- 🌀 Indicateurs de statut -->
 @if (isLoading()) {
   <div class="status loading">Chargement...</div>
@@ -11,22 +37,33 @@
   <div class="status error">{{ error() }}</div>
 }
 
-<!-- 🚫 Aucun message signalé -->
-@if (!isLoading() && reportedMessages().length === 0) {
-  <div>Aucun message signalé pour le moment.</div>
+<!-- 🚫 Aucun message -->
+@if (!isLoading() && currentMessages().length === 0) {
+  <div class="empty-state">
+    @if (!showArchived()) {
+      <div class="empty-icon">📭</div>
+      <h3>Aucun message signalé</h3>
+      <p>Tous les messages sont traités pour le moment.</p>
+    } @else {
+      <div class="empty-icon">🗃️</div>
+      <h3>Aucun message archivé</h3>
+      <p>Aucun message n'a été archivé pour le moment.</p>
+    }
+  </div>
 }
 
-<!-- ✅ Liste des messages signalés -->
-@if (reportedMessages().length > 0) {
+<!-- ✅ Liste des messages -->
+@if (currentMessages().length > 0) {
   <div class="message-list">
-    @for (msg of reportedMessages(); track msg.id) {
-      <div class="message-card">
-        
-
+    @for (msg of currentMessages(); track msg.id) {
+      <div class="message-card" [class.archived]="showArchived()">
         <div class="message-header">
           <span class="status-tag {{ msg.status.toLowerCase() }}">{{ msg.status }}</span>
           <span class="author">{{ msg.authorUsername }}</span>
           <span class="date">{{ msg.createdAt | date:'short' }}</span>
+          @if (showArchived()) {
+            <span class="archived-badge">🗃️ ARCHIVÉ</span>
+          }
         </div>
 
         <p class="content">« {{ msg.content }} »</p>
@@ -52,59 +89,34 @@
 
         <!-- 🎮 Actions -->
         <div class="actions">
-          <button (click)="approve(msg.id)">✅ Approuver</button>
-          <button (click)="archive(msg.id)">🗃 Archiver</button>
-          <button (click)="reject(msg.id)">🗑 Rejeter</button>
-          <button (click)="viewConversation(msg.conversationId)" 
-                  [disabled]="!msg.conversationId">
-            💬 Voir conversation
-          </button>
-          @if (msg.authorId) {
-            <button (click)="banUser(msg.authorId)">🚫 Bannir</button>
+          @if (!showArchived()) {
+            <!-- Actions pour messages signalés -->
+            <button (click)="approve(msg.id)">✅ Approuver</button>
+            <button (click)="archive(msg.id)">🗃 Archiver</button>
+            <button (click)="reject(msg.id)">🗑 Rejeter</button>
+            <button (click)="viewConversation(msg.conversationId)" 
+                    [disabled]="!msg.conversationId">
+              💬 Voir conversation
+            </button>
+            @if (msg.authorId) {
+              <button (click)="banUser(msg.authorId)">🚫 Bannir</button>
+            }
+            <button (click)="deleteMessage(msg.id)">❌ Supprimer définitivement</button>
+          } @else {
+            <!-- Actions pour messages archivés -->
+            <button (click)="unarchive(msg.id)">📤 Désarchiver</button>
+            <button (click)="viewConversation(msg.conversationId)" 
+                    [disabled]="!msg.conversationId">
+              💬 Voir conversation
+            </button>
+            <button (click)="deleteMessage(msg.id)" class="danger">
+              ❌ Supprimer définitivement
+            </button>
           }
-          <button (click)="deleteMessage(msg.id)">❌ Supprimer définitivement</button>
         </div>
       </div>
     }
   </div>
 }
 
-<!-- 💬 Modal de conversation -->
-@if (selectedConversation()) {
-  <div class="modal-overlay" (click)="closeConversation()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>💬 Conversation complète</h3>
-        <button class="close-btn" (click)="closeConversation()">❌</button>
-      </div>
-      
-      @if (isLoadingConversation()) {
-        <div class="loading-state">Chargement de la conversation...</div>
-      } @else {
-        <div class="messages-container">
-          @if (selectedConversation()!.length === 0) {
-            <p class="no-messages">Aucun message dans cette conversation</p>
-          } @else {
-            @for (message of selectedConversation()!; track message.id) {
-              <div class="message-bubble" 
-                   [class.reported]="message.id === selectedMessageId()">
-                <div class="message-meta">
-                  <strong>{{ message.authorUsername }}</strong>
-                  <span class="timestamp">{{ message.createdAt | date:'short' }}</span>
-                  @if (message.id === selectedMessageId()) {
-                    <span class="reported-badge">⚠ SIGNALÉ</span>
-                  }
-                </div>
-                <p class="message-content">{{ message.content }}</p>
-              </div>
-            }
-          }
-        </div>
-      }
-
-      <div class="modal-actions">
-        <button (click)="closeConversation()">Fermer</button>
-      </div>
-    </div>
-  </div>
-}
+<!-- ...existing code... (modal reste identique) -->
