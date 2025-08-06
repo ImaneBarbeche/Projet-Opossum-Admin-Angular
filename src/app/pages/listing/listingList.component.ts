@@ -44,6 +44,7 @@ export class ListingListComponent implements OnInit {
   // Liste filtrée côté client (recherche, statuts, type, catégorie)
   filteredListings = computed(() => {
     let result = this.listings();
+    
     // Filtrage recherche texte (titre, description)
     const search = this.searchTerm().toLowerCase().trim();
     if (search) {
@@ -52,10 +53,20 @@ export class ListingListComponent implements OnInit {
         (l.description && l.description.toLowerCase().includes(search))
       );
     }
-    // Statut
+    
+    // Statut - priorité au filtre de statut explicite
     if (this.selectedStatus() !== 'ALL') {
       result = result.filter(l => l.status === this.selectedStatus());
+    } else {
+      // Seulement si aucun statut spécifique n'est sélectionné, appliquer les filtres include/exclude
+      if (!this.includeArchived()) {
+        result = result.filter(l => l.status !== ListingStatus.ARCHIVED);
+      }
+      if (!this.includeDeleted()) {
+        result = result.filter(l => l.status !== ListingStatus.DELETED);
+      }
     }
+    
     // Type
     if (this.selectedType() !== 'ALL') {
       result = result.filter(l => l.type === this.selectedType());
@@ -64,13 +75,7 @@ export class ListingListComponent implements OnInit {
     if (this.selectedCategory() !== 'ALL') {
       result = result.filter(l => this.normalizeCategory(l.category) === this.selectedCategory());
     }
-    // Archivées/supprimées (admin)
-    if (!this.includeArchived()) {
-      result = result.filter(l => l.status !== ListingStatus.ARCHIVED);
-    }
-    if (!this.includeDeleted()) {
-      result = result.filter(l => l.status !== ListingStatus.DELETED);
-    }
+    
     return result;
   });
 
@@ -234,12 +239,6 @@ export class ListingListComponent implements OnInit {
   // Vérifier si peut archiver (ACTIVE/RESOLVED → ARCHIVED : Admin uniquement)
   canArchive(listing: Listing): boolean {
     const result = this.isAdmin() && listing.status !== ListingStatus.ARCHIVED;
-    console.log('[canArchive]', {
-      id: listing.id,
-      status: listing.status,
-      isAdmin: this.isAdmin(),
-      result
-    });
     return result;
   }
   // Vérifier si peut supprimer selon les règles
@@ -270,7 +269,7 @@ export class ListingListComponent implements OnInit {
 
   archiveListing(listing: Listing): void {
     if (confirm('Archiver cette annonce ?')) {
-      this.listingService.archiveListing(listing.id).subscribe({
+      this.listingService.updateListingStatus(listing.id, ListingStatus.ARCHIVED).subscribe({
         next: () => {
           this.loadListings();
           this.snackBar.open('📦 Annonce archivée', 'Fermer', { duration: 3000 });

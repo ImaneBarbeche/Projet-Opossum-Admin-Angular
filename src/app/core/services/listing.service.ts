@@ -16,29 +16,13 @@ export class ListingService {
   getAllListings(filters?: ListingFilters): Observable<ListingResponse> {
     let params = new HttpParams();
     
-    if (filters) {
-      if (filters.status && filters.status !== 'ALL') {
-        params = params.set('status', filters.status);
-      }
-      if (filters.type && filters.type !== 'ALL') {
-        params = params.set('type', filters.type);
-      }
-      if (filters.category && filters.category !== 'ALL') {
-        params = params.set('category', filters.category);
-      }
-      if (filters.city) {
-        params = params.set('city', filters.city);
-      }
-      if (filters.search) {
-        params = params.set('search', filters.search);
-      }
-      if (filters.limit) {
-        params = params.set('limit', filters.limit.toString());
-      }
-      if (filters.offset) {
-        params = params.set('offset', filters.offset.toString());
-      }
-    }
+    // Puisque le backend retourne toutes les annonces sans filtrage,
+    // on se contente d'envoyer les paramètres de pagination
+    params = params.set('page', '0');
+    params = params.set('size', '100'); // Récupérer plus d'annonces pour avoir toutes les données
+    
+    // Note: Le backend actuel ignore les filtres status/type/category
+    // Le filtrage est fait côté frontend dans le component
 
     return this.http.get<ListingResponse>(`${this.apiUrl}`, { 
       params,
@@ -67,21 +51,14 @@ export class ListingService {
     });
   }
 
-  // Supprimer une annonce
+  // Supprimer une annonce (soft delete)
   deleteListing(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/delete`, {
       withCredentials: true
     });
   }
 
-  // Archiver une annonce
-  archiveListing(id: string): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/${id}/archive`, {}, {
-      withCredentials: true
-    });
-  }
-
-  // Changer le statut d'une annonce (RESOLVED, ARCHIVED, etc.)
+  // Changer le statut d'une annonce (RESOLVED, ARCHIVED)
   updateListingStatus(id: string, status: ListingStatus): Observable<Listing> {
     return this.http.put<Listing>(`${this.apiUrl}/${id}/status`, { status }, {
       withCredentials: true

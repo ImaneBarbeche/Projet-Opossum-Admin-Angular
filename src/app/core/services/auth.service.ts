@@ -28,27 +28,45 @@ export class AuthService {
       withCredentials: true
     }).pipe(
       tap(response => {
-        // ✅ COOKIES ONLY - Pas de localStorage !
-        const user = (response as any).user || (response as any).data;
-        if (user) {
-          this.currentUserSubject.next(user);
-          this.startTokenCheckInterval();
+        const responseData = (response as any).data;
+        
+        // Extraire l'accessToken depuis data
+        if (responseData?.accessToken) {
+          this.accessToken = responseData.accessToken;
           
-          // 🔧 AJOUT: Sauvegarder dans sessionStorage pour éviter la déconnexion au refresh
-          sessionStorage.setItem('opossum_user_session', JSON.stringify({
-            user: user,
-            timestamp: Date.now()
-          }));
-          
-          // 👇 Gestion du cookie mock si présent
-          if ((response as any).setCookie) {
-            document.cookie = (response as any).setCookie;
+          // Décoder le JWT pour créer l'objet utilisateur
+          try {
+            const payload = JSON.parse(atob(this.accessToken!.split('.')[1]));
+            
+            const user: User = {
+              id: payload.sub,
+              email: payload.email,
+              role: payload.role,
+              firstName: payload.firstName || '',
+              lastName: payload.lastName || '',
+              active: true,
+              emailVerified: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            
+            this.currentUserSubject.next(user);
+            this.startTokenCheckInterval();
+            
+            // 🔧 AJOUT: Sauvegarder dans sessionStorage pour éviter la déconnexion au refresh
+            sessionStorage.setItem('opossum_user_session', JSON.stringify({
+              user: user,
+              timestamp: Date.now()
+            }));
+            
+          } catch (e) {
+            console.error('Erreur lors du décodage du JWT:', e);
           }
-          // 🔑 Stocker le JWT accessToken si présent
-          if ((response as any).accessToken) {
-            this.accessToken = (response as any).accessToken;
-          }
-        } else {
+        }
+        
+        // � Gestion du cookie mock si présent
+        if ((response as any).setCookie) {
+          document.cookie = (response as any).setCookie;
         }
       }),
       catchError(error => {
@@ -100,7 +118,6 @@ export class AuthService {
   // 👤 Récupérer utilisateur actuel
   getCurrentUser(): User | null {
     const user = this.currentUserSubject.value;
-    console.log('[getCurrentUser]', user);
     return user;
   }
 
