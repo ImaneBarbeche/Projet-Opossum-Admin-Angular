@@ -46,7 +46,6 @@ export class DashboardComponent implements OnInit {
    * Charge les statistiques du dashboard
    */
  loadStats(): void {
-    console.log('🔄 Début chargement stats...');
     this.isLoading.set(true);
     this.error.set(null);
 

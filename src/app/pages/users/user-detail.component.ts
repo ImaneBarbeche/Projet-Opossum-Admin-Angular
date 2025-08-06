@@ -78,11 +78,11 @@ export class UserDetailComponent implements OnInit {
         this.loading = false;
         
         if (error.status === 404) {
-          alert('❌ Utilisateur non trouvé (ID: ' + id + ')');
+          this.snackBar.open('❌ Utilisateur non trouvé (ID: ' + id + ')', 'Fermer', { duration: 4000 });
         } else if (error.status === 401) {
-          alert('❌ Non authentifié - Reconnectez-vous');
+          this.snackBar.open('❌ Non authentifié - Reconnectez-vous', 'Fermer', { duration: 4000 });
         } else {
-          alert('❌ Erreur lors du chargement de l\'utilisateur: ' + (error.error?.message || error.message));
+          this.snackBar.open('❌ Erreur lors du chargement de l\'utilisateur: ' + (error.error?.message || error.message), 'Fermer', { duration: 4000 });
         }
         
         // Rediriger vers la liste des utilisateurs
@@ -90,10 +90,6 @@ export class UserDetailComponent implements OnInit {
       }
     });
   }
-
-
-
-
 
   goBack(): void {
     this.router.navigate(['/users']);

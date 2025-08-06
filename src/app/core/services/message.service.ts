@@ -18,7 +18,6 @@ export class MessageService {
    */
   async getArchivedMessages(): Promise<ReportedMessage[]> {
     const url = `${this.baseUrl}/archived`;
-    console.log('🔍 API Call: GET', url);
     
     try {
       const response = await firstValueFrom(
@@ -40,12 +39,12 @@ export class MessageService {
   async unarchiveMessage(messageId: string): Promise<void> {
     throw new Error('Fonctionnalité non disponible : désarchiver un message n\'existe pas dans l\'API backend');
   }
+
   /**
    * 📩 Liste des messages signalés 
    */
   async getReportedMessages(): Promise<ReportedMessage[]> {
     const url = `${this.baseUrl}/moderation/reported`;
-    console.log('🔍 API Call: GET', url);
     
     try {
       const response = await firstValueFrom(
@@ -65,7 +64,6 @@ export class MessageService {
    */
   async approveMessage(messageId: string): Promise<void> {
     const url = `${this.baseUrl}/${messageId}/moderate/approved`;
-    console.log('🔍 API Call: POST', url);
     
     return firstValueFrom(
       this.http.post<void>(url, {}, {
@@ -79,7 +77,6 @@ export class MessageService {
    */
   async archiveMessage(messageId: string): Promise<void> {
     const url = `${this.baseUrl}/${messageId}/moderate/archived`;
-    console.log('🔍 API Call: POST', url);
     
     return firstValueFrom(
       this.http.post<void>(url, {}, {
@@ -93,10 +90,8 @@ export class MessageService {
    */
   async deleteMessage(messageId: string): Promise<void> {
     const url = `${this.baseUrl}/${messageId}/moderate/delete`;
-    console.log('🔍 API Call: POST', url);
-    
     return firstValueFrom(
-      this.http.post<void>(url, {}, {
+      this.http.delete<void>(url, {
         withCredentials: true
       })
     );
@@ -127,18 +122,4 @@ export class MessageService {
     }
   }
 
-    /**
-   * 🚫 Bannir un utilisateur
-   */
-  async banUser(userId: string, duration?: number): Promise<void> {
-    console.log('🔍 API Call: POST', `${environment.apiUrl}/admin/users/${userId}/ban`);
-    
-    const body = duration ? { duration } : {};
-    
-    return firstValueFrom(
-      this.http.post<void>(`${environment.apiUrl}/admin/users/${userId}/ban`, body, {
-        withCredentials: true
-      })
-    );
-  }
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MessageService } from 'src/app/core/services/message.service';
+import { UserService } from 'src/app/core/services/user.service';
 import { ReportedMessage } from 'src/app/core/models/message.model';
 
 
@@ -13,6 +14,7 @@ import { ReportedMessage } from 'src/app/core/models/message.model';
 })
 export class MessagesComponent implements OnInit {
   private readonly messageService = inject(MessageService);
+  private readonly userService = inject(UserService);
 
   // Signals pour l'état principal
   reportedMessages = signal<ReportedMessage[]>([]);
@@ -22,7 +24,7 @@ export class MessagesComponent implements OnInit {
   success = signal<string | null>(null);
 
   // Signals pour la modal de conversation
-    showArchived = signal(false);
+  showArchived = signal(false);
   selectedConversation = signal<any[] | null>(null);
   selectedConversationId = signal<string | null>(null);
   selectedMessageId = signal<string | null>(null);
@@ -57,7 +59,6 @@ export class MessagesComponent implements OnInit {
     try {
       const messages = await this.messageService.getReportedMessages();
       this.reportedMessages.set(messages);
-      console.log('📩 Messages signalés chargés:', messages.length);
     } catch (err: any) {
       const errorMessage = err?.error?.message || err?.message || 'Erreur lors du chargement des messages signalés';
       this.error.set(errorMessage);
@@ -75,7 +76,6 @@ export class MessagesComponent implements OnInit {
     try {
       const messages = await this.messageService.getArchivedMessages();
       this.archivedMessages.set(messages);
-      console.log('🗃️ Messages archivés chargés:', messages.length);
     } catch (err: any) {
       const errorMessage = err?.error?.message || err?.message || 'Erreur lors du chargement des messages archivés';
       this.error.set(errorMessage);
@@ -184,9 +184,21 @@ export class MessagesComponent implements OnInit {
    /**
    * 🚫 Bannir un utilisateur
    */
+  /**
+   * 🚫 Bannir un utilisateur (via UserService)
+   * Demande la durée (jours) et la raison, puis appelle userService.blockUser
+   */
   async banUser(userId: string): Promise<void> {
+    const durationStr = prompt('Durée du bannissement (en jours, laisser vide pour permanent) :');
+    let duration = durationStr ? parseInt(durationStr, 10) : undefined;
+    if (durationStr && (isNaN(duration!) || duration! < 1)) {
+      this.error.set('Durée invalide.');
+      return;
+    }
+    const reason = prompt('Raison du bannissement :') || 'Violation des règles';
+    this.clearMessages();
     try {
-      await this.messageService.banUser(userId);
+      await this.userService.blockUser(userId, duration ?? 9999, reason).toPromise();
       this.showSuccess("Utilisateur banni avec succès.");
     } catch (err: any) {
       const errorMessage = err?.error?.message || err?.message || "Erreur lors du bannissement.";

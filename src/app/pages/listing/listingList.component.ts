@@ -1,4 +1,5 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -18,21 +19,16 @@ import {
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './listingList.component.html',
   styleUrls: ['./listingList.component.css']
-
 })
 export class ListingListComponent implements OnInit {
-
-
+  private readonly snackBar = inject(MatSnackBar);
   private readonly listingService = inject(ListingService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-
   readonly ListingStatus = ListingStatus;
   readonly ListingType = ListingType;
   readonly ListingCategory = ListingCategory;
-
-
 
   listings = signal<Listing[]>([]);
   isLoading = signal(false);
@@ -113,12 +109,9 @@ export class ListingListComponent implements OnInit {
       includeArchived: this.includeArchived(),
       includeDeleted: this.includeDeleted()
     };
-  console.log('Filtres envoyés à l’API', filters);
     this.listingService.getAllListings(filters).subscribe({
       next: (response) => {
-        console.log('Réponse API', response);
         this.listings.set(response.data?.listings || []);
-        console.log('Signal listings', this.listings());
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -218,7 +211,6 @@ export class ListingListComponent implements OnInit {
   }
 
   getCategoryLabel(category: ListingCategory): string {
-      console.log('Catégorie reçue pour le badge:', category);
     switch (category) {
       case ListingCategory.ELECTRONICS: return 'Électronique';
       case ListingCategory.CLOTHING: return 'Vêtements';
@@ -255,10 +247,11 @@ export class ListingListComponent implements OnInit {
       this.listingService.updateListingStatus(Number(listing.id), ListingStatus.RESOLVED).subscribe({
         next: () => {
           this.loadListings();
+          this.snackBar.open('✅ Annonce marquée comme résolue', 'Fermer', { duration: 3000 });
         },
         error: (error) => {
           console.error('Erreur lors de la résolution:', error);
-          alert('Erreur lors de la résolution de l\'annonce');
+          this.snackBar.open('❌ Erreur lors de la résolution de l\'annonce', 'Fermer', { duration: 3000 });
         }
       });
     }
@@ -273,10 +266,11 @@ export class ListingListComponent implements OnInit {
       this.listingService.archiveListing(Number(listing.id)).subscribe({
         next: () => {
           this.loadListings();
+          this.snackBar.open('📦 Annonce archivée', 'Fermer', { duration: 3000 });
         },
         error: (error) => {
           console.error('Erreur lors de l\'archivage:', error);
-          alert('Erreur lors de l\'archivage de l\'annonce');
+          this.snackBar.open('❌ Erreur lors de l\'archivage de l\'annonce', 'Fermer', { duration: 3000 });
         }
       });
     }
@@ -287,10 +281,11 @@ export class ListingListComponent implements OnInit {
       this.listingService.deleteListing(Number(listing.id)).subscribe({
         next: () => {
           this.loadListings();
+          this.snackBar.open('🗑️ Annonce supprimée', 'Fermer', { duration: 3000 });
         },
         error: (error) => {
           console.error('Erreur lors de la suppression:', error);
-          alert('Erreur lors de la suppression de l\'annonce');
+          this.snackBar.open('❌ Erreur lors de la suppression de l\'annonce', 'Fermer', { duration: 3000 });
         }
       });
     }
@@ -303,10 +298,11 @@ export class ListingListComponent implements OnInit {
       this.listingService.updateListingStatus(Number(listing.id), ListingStatus.ACTIVE).subscribe({
         next: () => {
           this.loadListings();
+          this.snackBar.open('✅ Annonce réactivée', 'Fermer', { duration: 3000 });
         },
         error: (error) => {
           console.error('Erreur lors de la réactivation:', error);
-          alert('Erreur lors de la réactivation de l\'annonce');
+          this.snackBar.open('❌ Erreur lors de la réactivation de l\'annonce', 'Fermer', { duration: 3000 });
         }
       });
     }
