@@ -32,7 +32,7 @@ export class UserListComponent implements OnInit {
   
   // Filtres et recherche
   searchTerm = '';
-  currentFilter: 'all' | 'active' | 'blocked' = 'all';
+  currentFilter: 'all' | 'active' | 'blocked' | 'deleted' = 'all';
   
   // Pagination
   currentPage = 1;
@@ -44,6 +44,7 @@ export class UserListComponent implements OnInit {
   totalUsers = 0;
   activeUsers = 0;
   blockedUsers = 0;
+  deletedUsers = 0;
 
   private readonly snackBar = inject(MatSnackBar);
   constructor(
@@ -76,8 +77,9 @@ export class UserListComponent implements OnInit {
 
   calculateStats(): void {
     this.totalUsers = this.users.length;
-    this.activeUsers = this.users.filter(u => u.active && !this.isUserBlocked(u)).length;
+    this.activeUsers = this.users.filter(u => u.active && !this.isUserBlocked(u) && u.status !== 'DELETED').length;
     this.blockedUsers = this.users.filter(u => this.isUserBlocked(u)).length;
+    this.deletedUsers = this.users.filter(u => u.status === 'DELETED').length;
   }
 
   onSearch(): void {
@@ -85,7 +87,7 @@ export class UserListComponent implements OnInit {
     this.applyFilters();
   }
 
-  setFilter(filter: 'all' | 'active' | 'blocked'): void {
+  setFilter(filter: 'all' | 'active' | 'blocked' | 'deleted'): void {
     this.currentFilter = filter;
     this.currentPage = 1;
     this.applyFilters();
@@ -97,10 +99,13 @@ export class UserListComponent implements OnInit {
     // Filtre par statut
     switch (this.currentFilter) {
       case 'active':
-        filtered = filtered.filter(u => u.active && !this.isUserBlocked(u));
+        filtered = filtered.filter(u => u.active && !this.isUserBlocked(u) && u.status !== 'DELETED');
         break;
       case 'blocked':
         filtered = filtered.filter(u => this.isUserBlocked(u));
+        break;
+      case 'deleted':
+        filtered = filtered.filter(u => u.status === 'DELETED');
         break;
     }
 

@@ -36,7 +36,9 @@
             {{ user.firstName ? user.firstName[0] : '' }}{{ user.lastName ? user.lastName[0] : '' }}
           </div>
           <div class="status-badge" [class.active]="user.active">
-            @if (isUserBlocked()) {
+            @if (user.status === 'DELETED') {
+              🗑️ Supprimé
+            } @else if (isUserBlocked()) {
               🚫 Bloqué
               @if (user.unblockAt || user.blockedUntil) {
                 jusqu'au {{ formatDate(user.unblockAt || user.blockedUntil) }}

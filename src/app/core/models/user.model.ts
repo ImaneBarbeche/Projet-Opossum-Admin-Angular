@@ -114,8 +114,9 @@ export class UserHelpers {
       createdAt: source.created_at ?? source.createdAt,
       updatedAt: source.updated_at ?? source.updatedAt,
       lastLoginAt: source.last_login_at ?? source.lastLoginAt,
-      announcementsCount: source.announcementsCount,
-      activeAnnouncementsCount: source.activeAnnouncementsCount,
+      // Correction du mapping pour supporter snake_case et camelCase
+      announcementsCount: source.announcementsCount ?? source.listingsCount ?? source.announcements_count,
+      activeAnnouncementsCount: source.activeAnnouncementsCount ?? source.activeListingsCount ?? source.active_announcements_count,
       recentActivity: source.recentActivity,
       // autres propriétés si besoin
     } as User;

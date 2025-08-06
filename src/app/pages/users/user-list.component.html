@@ -35,6 +35,12 @@
         (click)="setFilter('blocked')">
         Bloqués ({{ blockedUsers }})
       </button>
+      <button 
+        class="filter-btn" 
+        [class.active]="currentFilter === 'deleted'"
+        (click)="setFilter('deleted')">
+        Supprimés ({{ deletedUsers }})
+      </button>
     </div>
   </div>
 
@@ -70,7 +76,9 @@
             </div>
             
             <div class="user-status">
-              @if (isUserBlocked(user)) {
+              @if (user.status === 'DELETED') {
+                <span class="status-badge deleted">🗑️ Supprimé</span>
+              } @else if (isUserBlocked(user)) {
                 <span class="status-badge blocked">
                   🚫 Bloqué
                   @if (user.unblockAt || user.blockedUntil) {
