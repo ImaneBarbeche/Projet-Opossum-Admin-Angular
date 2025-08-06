@@ -136,16 +136,16 @@ export class MessagesComponent implements OnInit {
   }
 
   /**
-   * 🗑 Rejeter un message
+   * 🗑 Supprimer un message (soft delete)
    */
-  async reject(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     this.clearMessages();
     try {
-      await this.messageService.rejectMessage(id);
-      this.showSuccess("Message rejeté.");
+      await this.messageService.deleteMessage(id);
+      this.showSuccess("Message supprimé.");
       await this.loadReportedMessages();
     } catch (err: any) {
-      const errorMessage = err?.error?.message || err?.message || "Erreur lors du rejet du message.";
+      const errorMessage = err?.error?.message || err?.message || "Erreur lors de la suppression du message.";
       this.error.set(errorMessage);
       console.error('❌ Erreur reject:', err);
     }
@@ -155,7 +155,6 @@ export class MessagesComponent implements OnInit {
    * 💬 Voir une conversation complète
    */
   async viewConversation(conversationId: string): Promise<void> {
-    console.log('🔍 viewConversation appelé avec conversationId:', conversationId);
     
     if (!conversationId) {
       this.error.set('ID de conversation manquant');
@@ -168,16 +167,11 @@ export class MessagesComponent implements OnInit {
 
     try {
       const messages = await this.messageService.getConversation(conversationId);
-      console.log('🎯 Messages de conversation reçus:', messages);
-      console.log('📝 Nombre de messages:', messages.length);
       
       // Debug des senderId uniques
       const uniqueUserIds = [...new Set(messages.map(m => m.senderId).filter(Boolean))];
-      console.log('👥 SenderId uniques:', uniqueUserIds);
-      console.log('🔢 Nombre de participants:', uniqueUserIds.length);
       
       this.selectedConversation.set(messages);
-      console.log('✅ selectedConversation mis à jour:', this.selectedConversation());
     } catch (err: any) {
       const errorMessage = err?.error?.message || err?.message || "Impossible de charger la conversation.";
       this.error.set(errorMessage);
@@ -202,7 +196,7 @@ export class MessagesComponent implements OnInit {
   }
 
 /**
-   * ❌ Supprimer définitivement un message
+   * ❌ Supprimer définitivement un message (hard delete)
    */
   async deleteMessage(id: string): Promise<void> {
     if (!confirm('Êtes-vous sûr de vouloir supprimer définitivement ce message ?')) {

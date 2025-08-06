@@ -6,7 +6,7 @@ import { UserDetailComponent } from './pages/users/user-detail.component';
 import { ListingListComponent } from './pages/listing/listingList.component';
 import { ListingDetailComponent } from './pages/listing/listing-detail.component';
 import { AuthGuard } from './core/guards/auth.guard';
-import { MessagesComponent } from './pages/messages/messages';
+import { MessagesComponent } from './pages/messages/messages.component';
 
 export const routes: Routes = [
   // 🔐 Route login (publique)

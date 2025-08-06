@@ -93,7 +93,7 @@
             <!-- Actions pour messages signalés -->
             <button (click)="approve(msg.id)">✅ Approuver</button>
             <button (click)="archive(msg.id)">🗃 Archiver</button>
-            <button (click)="reject(msg.id)">🗑 Rejeter</button>
+            <button (click)="delete(msg.id)">🗑 Supprimer</button>
             <button (click)="viewConversation(msg.conversationId)" 
                     [disabled]="!msg.conversationId">
               💬 Voir conversation

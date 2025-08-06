@@ -14,7 +14,7 @@ export class MessageService {
 
 
   /**
-   * 🗃️ Récupérer les messages archivés - ENDPOINT CORRIGÉ
+   * 🗃️ Récupérer les messages archivés 
    */
   async getArchivedMessages(): Promise<ReportedMessage[]> {
     const url = `${this.baseUrl}/archived`;
@@ -27,7 +27,6 @@ export class MessageService {
         })
       );
       
-      console.log('✅ Messages archivés reçus:', response);
       return response?.content || [];
     } catch (error) {
       console.error('❌ Erreur getArchivedMessages:', error);
@@ -42,7 +41,7 @@ export class MessageService {
     throw new Error('Fonctionnalité non disponible : désarchiver un message n\'existe pas dans l\'API backend');
   }
   /**
-   * 📩 Liste des messages signalés - ENDPOINT CORRIGÉ
+   * 📩 Liste des messages signalés 
    */
   async getReportedMessages(): Promise<ReportedMessage[]> {
     const url = `${this.baseUrl}/moderation/reported`;
@@ -54,9 +53,7 @@ export class MessageService {
           withCredentials: true
         })
       );
-      
-      console.log('✅ Messages signalés reçus:', response);
-      return response?.content || [];
+          return response?.content || [];
     } catch (error) {
       console.error('❌ Erreur getReportedMessages:', error);
       throw error;
@@ -64,10 +61,10 @@ export class MessageService {
   }
 
   /**
-   * ✅ Approuver un message - ENDPOINT CORRIGÉ
+   * ✅ Approuver un message 
    */
   async approveMessage(messageId: string): Promise<void> {
-    const url = `${this.baseUrl}/${messageId}/moderate/approve`;
+    const url = `${this.baseUrl}/${messageId}/moderate/approved`;
     console.log('🔍 API Call: POST', url);
     
     return firstValueFrom(
@@ -78,10 +75,10 @@ export class MessageService {
   }
 
    /**
-   * 🗃 Archiver un message - ENDPOINT CORRIGÉ
+   * 🗃 Archiver un message 
    */
   async archiveMessage(messageId: string): Promise<void> {
-    const url = `${this.baseUrl}/${messageId}/moderate/archive`;
+    const url = `${this.baseUrl}/${messageId}/moderate/archived`;
     console.log('🔍 API Call: POST', url);
     
     return firstValueFrom(
@@ -92,10 +89,10 @@ export class MessageService {
   }
 
    /**
-   * 🗑 Rejeter un message - ENDPOINT CORRIGÉ
+   * 🗑 Supprimer un message 
    */
-  async rejectMessage(messageId: string): Promise<void> {
-    const url = `${this.baseUrl}/${messageId}/moderate/reject`;
+  async deleteMessage(messageId: string): Promise<void> {
+    const url = `${this.baseUrl}/${messageId}/moderate/delete`;
     console.log('🔍 API Call: POST', url);
     
     return firstValueFrom(
@@ -106,11 +103,10 @@ export class MessageService {
   }
 
   /**
-   * 💬 Voir une conversation complète - ENDPOINT CORRIGÉ
+   * 💬 Voir une conversation complète 
    */
   async getConversation(conversationId: string): Promise<any[]> {
     const url = `${this.baseUrl}/conversations/${conversationId}`;
-    console.log('🔍 API Call: GET', url);
     
     try {
       const response = await firstValueFrom(
@@ -119,7 +115,6 @@ export class MessageService {
         })
       );
       
-      console.log('✅ Conversation reçue:', response);
       // Vérifier si c'est une Page ou un array direct
       if (response && typeof response === 'object' && 'content' in response) {
         return response.content || [];
@@ -130,13 +125,6 @@ export class MessageService {
       console.error('❌ Erreur getConversation:', error);
       throw error;
     }
-  }
-
-    /**
-   * ❌ Supprimer définitivement un message - FONCTIONNALITÉ NON DISPONIBLE
-   */
-  async deleteMessage(messageId: string): Promise<void> {
-    throw new Error('Fonctionnalité non disponible : supprimer définitivement un message n\'existe pas dans l\'API backend');
   }
 
     /**
