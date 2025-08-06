@@ -54,36 +54,36 @@ export class ListingService {
   }
 
   // Bloquer une annonce
-  blockListing(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/${id}/block`, {}, {
+  blockListing(id: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/block`, {}, {
       withCredentials: true
     });
   }
 
   // Débloquer une annonce
-  unblockListing(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/${id}/unblock`, {}, {
+  unblockListing(id: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/unblock`, {}, {
       withCredentials: true
     });
   }
 
   // Supprimer une annonce
-  deleteListing(id: number): Observable<void> {
+  deleteListing(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, {
       withCredentials: true
     });
   }
 
   // Archiver une annonce
-  archiveListing(id: number): Observable<void> {
+  archiveListing(id: string): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${id}/archive`, {}, {
       withCredentials: true
     });
   }
 
-  // Changer le statut d'une annonce
-  updateListingStatus(id: number, status: ListingStatus): Observable<Listing> {
-    return this.http.patch<Listing>(`${this.apiUrl}/${id}/status`, { status }, {
+  // Changer le statut d'une annonce (RESOLVED, ARCHIVED, etc.)
+  updateListingStatus(id: string, status: ListingStatus): Observable<Listing> {
+    return this.http.put<Listing>(`${this.apiUrl}/${id}/status`, { status }, {
       withCredentials: true
     });
   }

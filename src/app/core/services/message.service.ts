@@ -34,10 +34,16 @@ export class MessageService {
   }
 
   /**
-   * 📤 Désarchiver un message - FONCTIONNALITÉ NON DISPONIBLE
+   * 📤 Désarchiver un message 
    */
   async unarchiveMessage(messageId: string): Promise<void> {
-    throw new Error('Fonctionnalité non disponible : désarchiver un message n\'existe pas dans l\'API backend');
+    const url = `${this.baseUrl}/${messageId}/moderate/unarchive`;
+
+    return firstValueFrom(
+      this.http.post<void>(url, {}, {
+        withCredentials: true
+      })
+    );
   }
 
   /**

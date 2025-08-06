@@ -233,7 +233,14 @@ export class ListingListComponent implements OnInit {
 
   // Vérifier si peut archiver (ACTIVE/RESOLVED → ARCHIVED : Admin uniquement)
   canArchive(listing: Listing): boolean {
-    return this.isAdmin() && listing.status !== ListingStatus.ARCHIVED;
+    const result = this.isAdmin() && listing.status !== ListingStatus.ARCHIVED;
+    console.log('[canArchive]', {
+      id: listing.id,
+      status: listing.status,
+      isAdmin: this.isAdmin(),
+      result
+    });
+    return result;
   }
   // Vérifier si peut supprimer selon les règles
   canDelete(listing: Listing): boolean {
@@ -244,7 +251,7 @@ export class ListingListComponent implements OnInit {
   // Marquer comme résolu
   markAsResolved(listing: Listing): void {
     if (confirm('Marquer cette annonce comme résolue ?')) {
-      this.listingService.updateListingStatus(Number(listing.id), ListingStatus.RESOLVED).subscribe({
+      this.listingService.updateListingStatus(listing.id, ListingStatus.RESOLVED).subscribe({
         next: () => {
           this.loadListings();
           this.snackBar.open('✅ Annonce marquée comme résolue', 'Fermer', { duration: 3000 });
@@ -263,7 +270,7 @@ export class ListingListComponent implements OnInit {
 
   archiveListing(listing: Listing): void {
     if (confirm('Archiver cette annonce ?')) {
-      this.listingService.archiveListing(Number(listing.id)).subscribe({
+      this.listingService.archiveListing(listing.id).subscribe({
         next: () => {
           this.loadListings();
           this.snackBar.open('📦 Annonce archivée', 'Fermer', { duration: 3000 });
@@ -278,7 +285,7 @@ export class ListingListComponent implements OnInit {
 
   deleteListing(listing: Listing): void {
     if (confirm('⚠️ ATTENTION ! Supprimer définitivement cette annonce ?')) {
-      this.listingService.deleteListing(Number(listing.id)).subscribe({
+      this.listingService.deleteListing(listing.id).subscribe({
         next: () => {
           this.loadListings();
           this.snackBar.open('🗑️ Annonce supprimée', 'Fermer', { duration: 3000 });
@@ -295,7 +302,7 @@ export class ListingListComponent implements OnInit {
     if (!this.canReactivate(listing)) return;
 
     if (confirm('Réactiver cette annonce résolue ?')) {
-      this.listingService.updateListingStatus(Number(listing.id), ListingStatus.ACTIVE).subscribe({
+      this.listingService.updateListingStatus(listing.id, ListingStatus.ACTIVE).subscribe({
         next: () => {
           this.loadListings();
           this.snackBar.open('✅ Annonce réactivée', 'Fermer', { duration: 3000 });

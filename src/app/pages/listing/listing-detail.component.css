@@ -1,3 +1,31 @@
+/* Boutons de modération cohérents avec l'admin */
+.detail-actions .btn {
+  border-radius: 2rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.detail-actions .btn-danger {
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+}
+.detail-actions .btn-danger:hover {
+  background: #d9363e;
+  color: #fff;
+}
+.detail-actions .btn-success {
+  background: #52c41a;
+  color: #fff;
+  border: none;
+}
+.detail-actions .btn-success:hover {
+  background: #389e0d;
+  color: #fff;
+}
 .btn-back {
   display: inline-flex;
   align-items: center;

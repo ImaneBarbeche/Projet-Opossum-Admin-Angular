@@ -99,7 +99,9 @@ export class AuthService {
 
   // 👤 Récupérer utilisateur actuel
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    const user = this.currentUserSubject.value;
+    console.log('[getCurrentUser]', user);
+    return user;
   }
 
   // 🔄 INITIALISATION AU DÉMARRAGE - Avec fallback sessionStorage

@@ -31,6 +31,14 @@
       </div>
     </div>
 
+    <!-- Actions admin de modération -->
+    <div class="detail-actions" style="margin-bottom: 1rem;">
+      @if (listing.status !== ListingStatus.ARCHIVED) {
+        <button class="btn btn-danger" (click)="blockListing()">🚫 Bloquer l'annonce</button>
+      } @else {
+        <button class="btn btn-success" (click)="unblockListing()">✅ Débloquer l'annonce</button>
+      }
+    </div>
     <div class="detail-content">
       @if (listing.photoUrl && (!listing.imageUrls ||
       !listing.imageUrls.includes(listing.photoUrl))) {
