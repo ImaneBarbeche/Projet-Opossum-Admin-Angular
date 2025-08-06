@@ -44,12 +44,12 @@ export class UserService {
 
   // 🗑️ Supprimer un utilisateur (admin)
   deleteUser(id: string): Observable<void> {
-    return this.http.delete<void>(`${environment.apiUrl}/admin/users/${id}`, {
+    return this.http.delete<void>(`${environment.apiUrl}/admin/users/${id}/delete`, {
       withCredentials: true
     });
   }
 
-  // 🚫 Bloquer un utilisateur - CORRIGÉ
+  // 🚫 Bloquer un utilisateur
   blockUser(userId: string, durationDays: number, reason: string): Observable<void> {
     // Nouvelle API: envoie raison et durée
     return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/block`, {
@@ -60,7 +60,7 @@ export class UserService {
     });
   }
 
-  // ✅ Débloquer un utilisateur - CORRIGÉ
+  // ✅ Débloquer un utilisateur 
   unblockUser(userId: string): Observable<void> {
     // ✅ CORRECTION : Utiliser environment.apiUrl au lieu de this.apiUrl
     return this.http.put<void>(`${environment.apiUrl}/admin/users/${userId}/unblock`, {}, {
