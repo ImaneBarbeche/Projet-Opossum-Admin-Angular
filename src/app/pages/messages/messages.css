@@ -1,62 +1,399 @@
+/* === Conteneur principal === */
 .message-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+  margin-top: 1rem;
 }
 
 .message-card {
-  background: #f9f9f9;
-  border-left: 4px solid #d9534f;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
 }
 
+.message-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #d1d5db;
+}
+
+/* === Header du message === */
 .message-header {
   display: flex;
-  justify-content: space-between;
-  font-weight: bold;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
-.message-content {
+.status-tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-tag.pending { background: #fef3c7; color: #92400e; }
+.status-tag.approved { background: #d1fae5; color: #065f46; }
+.status-tag.rejected { background: #fee2e2; color: #dc2626; }
+.status-tag.archived { background: #f3f4f6; color: #374151; }
+
+.author {
+  font-weight: 600;
+  color: #374151;
+}
+
+.date {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* === Contenu du message === */
+.content {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+  margin: 1rem 0;
   font-style: italic;
-  margin: 0.5rem 0;
+  color: #374151;
 }
 
-.message-info {
-  font-size: 0.9rem;
-  color: #666;
+/* === Liste des signalements === */
+.reports {
+  background: #fef2f2;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  list-style: none;
+  border-left: 4px solid #ef4444;
 }
 
-.status {
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  color: white;
+.reports li {
+  color: #dc2626;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
 }
 
-.status.reported {
-  background-color: #ffc107;
+.reports li:last-child {
+  margin-bottom: 0;
 }
 
-.status.moderated {
-  background-color: #17a2b8;
+/* === Historique de modération === */
+.history {
+  background: #f0f9ff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-left: 4px solid #0ea5e9;
 }
 
-.status.deleted {
-  background-color: #dc3545;
+.history strong {
+  color: #0369a1;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.history ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.history li {
+  color: #0369a1;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+/* === BOUTONS D'ACTIONS === */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 .actions button {
-  margin-right: 0.5rem;
-  background: #e7e7e7;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
   border: none;
-  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  min-height: 40px;
 }
 
-.actions button:hover {
-  background: #cfcfcf;
+/* Bouton Approuver */
+.actions button:nth-child(1) {
+  background: #10b981;
+  color: white;
+}
+
+.actions button:nth-child(1):hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Bouton Archiver */
+.actions button:nth-child(2) {
+  background: #6b7280;
+  color: white;
+}
+
+.actions button:nth-child(2):hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+/* Bouton Rejeter */
+.actions button:nth-child(3) {
+  background: #ef4444;
+  color: white;
+}
+
+.actions button:nth-child(3):hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Bouton Voir conversation */
+.actions button:nth-child(4) {
+  background: #3b82f6;
+  color: white;
+}
+
+.actions button:nth-child(4):hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Bouton Bannir */
+.actions button:nth-child(5) {
+  background: #f59e0b;
+  color: white;
+}
+
+.actions button:nth-child(5):hover {
+  background: #d97706;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* Bouton Supprimer définitivement */
+.actions button:last-child {
+  background: #991b1b;
+  color: white;
+}
+
+.actions button:last-child:hover {
+  background: #7f1d1d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(153, 27, 27, 0.3);
+}
+
+/* Boutons désactivés */
+.actions button:disabled {
+  background: #d1d5db !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* === MODAL DE CONVERSATION === */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #374151;
+}
+
+.close-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.close-btn:hover {
+  background: #dc2626;
+}
+
+.messages-container {
+  padding: 1.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.message-bubble {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.message-bubble.reported {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.timestamp {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.reported-badge {
+  background: #ef4444;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.message-content {
+  margin: 0;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.modal-actions button {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-actions button:hover {
+  background: #4b5563;
+}
+
+/* === États de chargement === */
+.status {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.status.loading {
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.status.success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.status.error {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.no-messages {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  padding: 2rem;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .actions {
+    flex-direction: column;
+  }
+  
+  .actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .message-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
 }
