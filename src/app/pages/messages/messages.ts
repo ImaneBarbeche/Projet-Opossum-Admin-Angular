@@ -170,6 +170,12 @@ export class MessagesComponent implements OnInit {
       const messages = await this.messageService.getConversation(conversationId);
       console.log('🎯 Messages de conversation reçus:', messages);
       console.log('📝 Nombre de messages:', messages.length);
+      
+      // Debug des senderId uniques
+      const uniqueUserIds = [...new Set(messages.map(m => m.senderId).filter(Boolean))];
+      console.log('👥 SenderId uniques:', uniqueUserIds);
+      console.log('🔢 Nombre de participants:', uniqueUserIds.length);
+      
       this.selectedConversation.set(messages);
       console.log('✅ selectedConversation mis à jour:', this.selectedConversation());
     } catch (err: any) {

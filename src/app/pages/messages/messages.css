@@ -251,10 +251,16 @@
   background: #f9fafb;
 }
 
-.modal-header h3 {
-  margin: 0;
+.conversation-info h3 {
+  margin: 0 0 0.25rem 0;
   color: #374151;
   font-size: 1.25rem;
+}
+
+.conversation-stats {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 .close-btn {
