@@ -11,7 +11,7 @@ import { User } from '../../core/models/user.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './user-list.component.html',
-  styleUrl: './user-list.component.css'
+  styleUrls: ['./user-list.component.css'] 
 })
 export class UserListComponent implements OnInit {
   // Utilitaire pour savoir si un utilisateur est bloqué (supporte unblockAt ET blockedUntil)
@@ -292,4 +292,4 @@ export class UserListComponent implements OnInit {
   getTotalFiltered(): number {
     return this.totalFiltered;
   }
-}
+}// Force recompilation
