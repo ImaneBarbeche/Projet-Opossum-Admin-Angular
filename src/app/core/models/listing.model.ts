@@ -78,6 +78,9 @@ export interface Listing {
   resolved_at?: string;
   created_at: string;
   updated_at: string;
+
+  // UI only: fallback image si erreur de chargement
+  photoError?: boolean;
 }
 
 // Interface pour les filtres de recherche

@@ -13,6 +13,15 @@ import { ListingDetail, ListingStatus, ListingType, ListingCategory } from '../.
   styleUrls: ['./listing-detail.component.css']
 })
 export class ListingDetailComponent implements OnInit {
+
+  /**
+   * Retourne les images de la galerie sans la photo principale (évite le doublon)
+   */
+  getGalleryImages(): string[] {
+    if (!this.listing) return [];
+    if (!this.listing.photoUrl) return this.listing.imageUrls || [];
+    return (this.listing.imageUrls || []).filter(img => img !== this.listing?.photoUrl);
+  }
   private readonly snackBar = inject(MatSnackBar);
   private readonly route = inject(ActivatedRoute);
   private readonly listingService = inject(ListingService);
@@ -21,6 +30,7 @@ export class ListingDetailComponent implements OnInit {
   listing: ListingDetail | null = null;
   isLoading = true;
   error: string | null = null;
+  photoError = false;
 
   readonly ListingStatus = ListingStatus;
   readonly ListingType = ListingType;
@@ -33,6 +43,7 @@ export class ListingDetailComponent implements OnInit {
         next: (listing) => {
           this.listing = listing;
           this.isLoading = false;
+          this.photoError = false;
         },
         error: () => {
           this.error = "Erreur lors du chargement de l'annonce.";
@@ -86,6 +97,7 @@ export class ListingDetailComponent implements OnInit {
       next: (listing) => {
         this.listing = listing;
         this.isLoading = false;
+        this.photoError = false;
       },
       error: () => {
         this.error = "Erreur lors du rechargement de l'annonce.";

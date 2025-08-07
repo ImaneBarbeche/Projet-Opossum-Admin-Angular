@@ -34,22 +34,22 @@
     <!-- Actions admin de modération -->
     <div class="detail-actions">
       @if (listing.status !== ListingStatus.ARCHIVED) {
-        <button class="btn btn-danger" (click)="blockListing()">🚫 Bloquer l'annonce</button>
+        <button class="action-btn delete" (click)="blockListing()">🚫 Bloquer l'annonce</button>
       } @else {
-        <button class="btn btn-success" (click)="unblockListing()">✅ Débloquer l'annonce</button>
+        <button class="action-btn reactivate" (click)="unblockListing()">✅ Débloquer l'annonce</button>
       }
     </div>
     <div class="detail-content">
-      @if (listing.photoUrl && (!listing.imageUrls ||
-      !listing.imageUrls.includes(listing.photoUrl))) {
       <img
-        [src]="listing.photoUrl"
+        [src]="listing.photoUrl && !photoError ? listing.photoUrl : 'assets/no-photo.png'"
         [alt]="listing.title"
         class="listing-image"
+        (error)="photoError = true"
+        loading="lazy"
       />
-      } @if (listing.imageUrls && listing.imageUrls.length) {
+      @if (getGalleryImages().length) {
       <div class="listing-images">
-        @for (img of listing.imageUrls; track img) {
+        @for (img of getGalleryImages(); track img) {
         <img [src]="img" [alt]="listing.title" class="listing-image" />
         }
       </div>

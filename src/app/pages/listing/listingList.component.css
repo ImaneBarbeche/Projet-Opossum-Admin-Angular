@@ -212,9 +212,11 @@
 }
 
 /* 🖼️ Image annonce */
+/* 🖼️ Image annonce améliorée */
 .listing-image {
   width: 100%;
-  max-width: 320px;
+  aspect-ratio: 1/1;
+  max-width: 220px;
   margin: 0 auto 10px auto;
   border-radius: 8px;
   overflow: hidden;
@@ -222,12 +224,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 .card-image {
   width: 100%;
-  height: 180px;
-  object-fit: cover;
+  height: 100%;
+  object-fit: contain;
   display: block;
+  background: #f3f3f3;
+}
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: #b2bec3;
+  background: #f3f3f3;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 /* 📝 Contenu */

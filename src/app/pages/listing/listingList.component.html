@@ -174,7 +174,6 @@
 
   
   <!-- ===== LISTE DES ANNONCES ===== -->
-  @if (!isLoading() && !error()) {
     <div class="listings-grid">
       @for (listing of filteredListings(); track listing.id) {
         <div class="listing-card" [class]="'status-' + listing.status.toLowerCase()">
@@ -265,15 +264,15 @@
               {{ listing.description | slice:0:150 }}{{ listing.description.length > 150 ? '...' : '' }}
             </p>
             
-            @if (listing.photo_url) {
-              <div class="listing-image">
-                <img 
-                  [src]="listing.photo_url" 
-                  [alt]="listing.title"
-                  class="card-image"
-                />
-              </div>
-            }
+            <div class="listing-image">
+              <img
+                [src]="listing.photo_url && !listing.photoError ? listing.photo_url : 'assets/no-photo.png'"
+                [alt]="listing.title"
+                class="card-image"
+                (error)="listing.photoError = true"
+                loading="lazy"
+              />
+            </div>
             
             <div class="listing-meta">
               <!-- Contact -->
@@ -362,5 +361,4 @@
         </div>
       }
     </div>
-  }
 </div>

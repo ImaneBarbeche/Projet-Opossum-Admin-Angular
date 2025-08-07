@@ -1,3 +1,77 @@
+/* Harmonisation boutons action avec la liste des annonces */
+.action-btn {
+  width: auto;
+  min-width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  background: #f3f3f3;
+  color: #5a6c7d;
+  font-weight: 500;
+}
+.action-btn:hover {
+  background: #eaf3fa;
+  color: #3498db;
+  transform: scale(1.08);
+}
+.action-btn.delete {
+  background: #e74c3c;
+  color: white;
+}
+.action-btn.delete:hover {
+  background: #c0392b;
+}
+.action-btn.reactivate {
+  background: #3498db;
+  color: white;
+}
+.action-btn.reactivate:hover {
+  background: #217dbb;
+}
+/* Harmonisation boutons action avec la liste des annonces */
+.action-btn {
+  width: auto;
+  min-width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  background: #f3f3f3;
+  color: #5a6c7d;
+  font-weight: 500;
+}
+.action-btn:hover {
+  background: #eaf3fa;
+  color: #3498db;
+  transform: scale(1.08);
+}
+.action-btn.delete {
+  background: #e74c3c;
+  color: white;
+}
+.action-btn.delete:hover {
+  background: #c0392b;
+}
+.action-btn.reactivate {
+  background: #3498db;
+  color: white;
+}
+.action-btn.reactivate:hover {
+  background: #217dbb;
+}
 /* Boutons de modération cohérents avec l'admin */
 .detail-actions {
   margin-bottom: 1rem;

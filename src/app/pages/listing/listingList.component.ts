@@ -116,7 +116,9 @@ export class ListingListComponent implements OnInit {
     };
     this.listingService.getAllListings(filters).subscribe({
       next: (response) => {
-        this.listings.set(response.data?.listings || []);
+        // Ajoute la propriété photoError à false pour chaque annonce
+        const listings = (response.data?.listings || []).map((l: any) => ({ ...l, photoError: false }));
+        this.listings.set(listings);
         this.isLoading.set(false);
       },
       error: (err) => {
