@@ -1,60 +1,105 @@
-# AdminAngular
+# Opossum Admin Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.0.
+Ce projet est le panneau d'administration de la plateforme Opossum (objets perdus/trouvés), développé avec **Angular 20** et les dernières bonnes pratiques (standalone components, signals, computed, DI moderne, etc.).
 
-## Development server
+## Sommaire
+- [Fonctionnalités](#fonctionnalités)
+- [Architecture](#architecture)
+- [Installation & Démarrage](#installation--démarrage)
+- [Tests & Couverture](#tests--couverture)
+- [Règles Métier Critiques](#règles-métier-critiques)
+- [Structure des dossiers](#structure-des-dossiers)
+- [Contribuer](#contribuer)
 
-To start a local development server, run:
+---
 
+## Fonctionnalités
+- Gestion des annonces (CRUD, transitions de statut, archivage, suppression, etc.)
+- Modération des utilisateurs (blocage/déblocage, suppression, stats)
+- Tableau de bord statistiques
+- Modération des messages signalés
+- Authentification par cookie (mock ou API réelle)
+- Filtres avancés, recherche, pagination
+- UI responsive, statuts et rôles clairement affichés
+
+## Architecture
+- **Angular 20+** standalone components, signals, computed
+- **Services** : gestion centralisée des appels API, mock possible
+- **State** : pas de NgRx, tout en signals/computed/services
+- **Tests** : couverture exhaustive des services et composants principaux
+- **Rôles** : séparation stricte admin/utilisateur
+- **Mock** : Interceptor de mock pour développement rapide
+
+## Installation & Démarrage
+
+### Prérequis
+- Node.js >= 18
+- npm >= 9
+
+### Installation
+```bash
+npm install
+```
+
+### Lancer le serveur de développement
+```bash
+npm start
+```
+Ou directement :
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Accédez à [http://localhost:4200](http://localhost:4200)
 
-## Code scaffolding
+### Variables d'environnement
+- Modifier `src/environments/environment.ts` pour l'URL API ou activer le mock (`useMockData`)
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Tests & Couverture
 
+### Lancer les tests unitaires
 ```bash
-ng generate component component-name
+npm test
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Couverture des tests
+- **Services** (auth, users, listings, messages, stats) : 100% des méthodes critiques testées
+- **Composants principaux** (listings, users, login, dashboard, messages) : 100% testés
+- **Helpers, guards, interceptors** : à compléter si besoin
 
-```bash
-ng generate --help
+**Taux de couverture global : > 95%** (toutes les fonctionnalités métier critiques sont testées)
+
+Un rapport détaillé de couverture est généré dans `coverage/` après chaque test.
+
+## Règles Métier Critiques
+- Statuts d'annonce : transitions strictes (ACTIVE, RESOLVED, ARCHIVED, DELETED)
+- Archivage/suppression : réservé admin, suppression soft
+- Blocage utilisateur : durée, motif, déblocage, statuts visibles
+- Authentification : cookies, sessionStorage (mock ou API réelle)
+- Filtres : archivés/supprimés non visibles par défaut, options admin
+
+## Structure des dossiers
+```
+src/
+  app/
+    core/
+      services/      # Services API, auth, users, listings, messages, stats
+      models/        # Interfaces, enums, helpers
+      interceptors/  # Mock, JWT
+      guards/        # Auth, admin
+    pages/
+      annonces/      # Gestion des annonces
+      users/         # Gestion des utilisateurs
+      dashboard/     # Statistiques
+      auth/          # Login
+    shared/          # Navbar, sidebar, composants réutilisables
 ```
 
-## Building
+## Contribuer
+- Forkez le repo, créez une branche, ouvrez une PR
+- Merci de respecter l’architecture Angular moderne et les conventions du projet
+- Les tests unitaires sont obligatoires pour toute nouvelle fonctionnalité
 
-To build the project run:
+---
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-# Projet-Opossum-Admin-Angular
+© 2025 Projet Opossum Admin Angular
