@@ -27,7 +27,10 @@
           }
         </span>
         <span class="badge type-badge">{{ listing.type }}</span>
-        <span class="badge category-badge">{{ listing.category }}</span>
+        <span class="badge category-badge">
+          {{ getCategoryIcon(normalizeCategory(listing.category)) }}
+          {{ getCategoryLabel(normalizeCategory(listing.category)) }}
+        </span>
       </div>
     </div>
 

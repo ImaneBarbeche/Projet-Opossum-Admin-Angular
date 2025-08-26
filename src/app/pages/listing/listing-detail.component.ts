@@ -13,6 +13,57 @@ import { ListingDetail, ListingStatus, ListingType, ListingCategory } from '../.
   styleUrls: ['./listing-detail.component.css']
 })
 export class ListingDetailComponent implements OnInit {
+  getCategoryIcon(category: ListingCategory): string {
+    switch (category) {
+      case ListingCategory.ELECTRONICS: return '📱';
+      case ListingCategory.CLOTHING: return '👕';
+      case ListingCategory.ACCESSORIES: return '👜';
+      case ListingCategory.DOCUMENTS: return '📄';
+      case ListingCategory.KEYS: return '🔑';
+      case ListingCategory.BAGS: return '🎒';
+      case ListingCategory.JEWELRY: return '💍';
+      case ListingCategory.PETS: return '🐕';
+      case ListingCategory.OTHER: return '📦';
+      default: return '❓';
+    }
+  }
+
+  getCategoryLabel(category: ListingCategory): string {
+    switch (category) {
+      case ListingCategory.ELECTRONICS: return 'Électronique';
+      case ListingCategory.CLOTHING: return 'Vêtements';
+      case ListingCategory.ACCESSORIES: return 'Accessoires';
+      case ListingCategory.DOCUMENTS: return 'Documents';
+      case ListingCategory.KEYS: return 'Clés';
+      case ListingCategory.BAGS: return 'Sacs';
+      case ListingCategory.JEWELRY: return 'Bijoux';
+      case ListingCategory.PETS: return 'Animaux';
+      case ListingCategory.OTHER: return 'Autre';
+      default: return 'Inconnu';
+    }
+  }
+
+  /**
+   * Normalise la catégorie reçue du backend (français) vers l'enum Angular (anglais)
+   */
+  normalizeCategory(category: string): ListingCategory {
+    switch (category?.toLowerCase()) {
+      case 'électronique': return ListingCategory.ELECTRONICS;
+      case 'vêtements': return ListingCategory.CLOTHING;
+      case 'accessoires': return ListingCategory.ACCESSORIES;
+      case 'documents': return ListingCategory.DOCUMENTS;
+      case 'clés': return ListingCategory.KEYS;
+      case 'sacs':
+      case 'bagages': return ListingCategory.BAGS;
+      case 'bijoux': return ListingCategory.JEWELRY;
+      case 'animaux': return ListingCategory.PETS;
+      case 'autre': return ListingCategory.OTHER;
+      default:
+        // Si déjà une valeur d'enum, la renvoyer
+        if ((Object.values(ListingCategory) as string[]).includes(category)) return category as ListingCategory;
+        return ListingCategory.OTHER;
+    }
+  }
 
   /**
    * Retourne les images de la galerie sans la photo principale (évite le doublon)
@@ -38,15 +89,18 @@ export class ListingDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    console.log('Loading listing with ID:', id);
     if (id) {
       this.listingService.getListingById(id).subscribe({
         next: (listing) => {
+          console.log('Listing loaded successfully:', listing);
           this.listing = listing;
           this.isLoading = false;
           this.photoError = false;
         },
-        error: () => {
-          this.error = "Erreur lors du chargement de l'annonce.";
+        error: (error) => {
+          console.error('Error loading listing:', error);
+          this.error = `Erreur lors du chargement de l'annonce: ${error.error?.error?.message || error.message || 'Erreur inconnue'}`;
           this.isLoading = false;
         }
       });
@@ -61,7 +115,7 @@ export class ListingDetailComponent implements OnInit {
   }
 
   blockListing(): void {
-    if (!this.listing) return;
+    if (!this.listing || !this.listing.id) return;
     if (confirm('Bloquer cette annonce ?')) {
       this.listingService.blockListing(this.listing.id).subscribe({
         next: () => {
@@ -76,7 +130,7 @@ export class ListingDetailComponent implements OnInit {
   }
 
   unblockListing(): void {
-    if (!this.listing) return;
+    if (!this.listing || !this.listing.id) return;
     if (confirm('Débloquer cette annonce ?')) {
       this.listingService.unblockListing(this.listing.id).subscribe({
         next: () => {
@@ -91,7 +145,7 @@ export class ListingDetailComponent implements OnInit {
   }
 
   private reload(): void {
-    if (!this.listing) return;
+    if (!this.listing || !this.listing.id) return;
     this.isLoading = true;
     this.listingService.getListingById(String(this.listing.id)).subscribe({
       next: (listing) => {

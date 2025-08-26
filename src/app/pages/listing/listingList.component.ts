@@ -116,8 +116,19 @@ export class ListingListComponent implements OnInit {
     };
     this.listingService.getAllListings(filters).subscribe({
       next: (response) => {
-        // Ajoute la propriété photoError à false pour chaque annonce
-        const listings = (response.data?.listings || []).map((l: any) => ({ ...l, photoError: false }));
+        // Correction du mapping :
+        const listings = (response.data?.listings || []).map((l: any) => ({
+          ...l,
+          // Correction : id = id d'annonce, user_id = id utilisateur
+          id: l.id ?? l.annonce_id ?? (l.annonce && l.annonce.id) ?? '',
+          user_id: l.user_id ?? (l.user && l.user.id) ?? '',
+          photoError: false
+        }));
+        // Log des IDs pour debug
+        console.log('=== DEBUG LISTINGS IDS (après mapping) ===');
+        listings.forEach((l: any, idx: number) => {
+          console.log(`#${idx} | id:`, l.id, '| user_id:', l.user_id);
+        });
         this.listings.set(listings);
         this.isLoading.set(false);
       },
