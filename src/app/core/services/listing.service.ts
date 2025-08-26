@@ -33,7 +33,6 @@ export class ListingService {
   // Récupérer une annonce par ID (id string/UUID)
   getListingById(id: string): Observable<ListingDetail> {
     const url = `${this.apiUrl}/${id}`;
-    console.log('Calling API for listing detail:', url);
     return this.http.get<{ data: ListingDetail }>(url, {
       withCredentials: true
     }).pipe(map(res => res.data));

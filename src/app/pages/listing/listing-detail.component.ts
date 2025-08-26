@@ -89,11 +89,9 @@ export class ListingDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    console.log('Loading listing with ID:', id);
     if (id) {
       this.listingService.getListingById(id).subscribe({
         next: (listing) => {
-          console.log('Listing loaded successfully:', listing);
           this.listing = listing;
           this.isLoading = false;
           this.photoError = false;

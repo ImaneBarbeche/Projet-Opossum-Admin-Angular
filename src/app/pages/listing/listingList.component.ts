@@ -124,11 +124,6 @@ export class ListingListComponent implements OnInit {
           user_id: l.user_id ?? (l.user && l.user.id) ?? '',
           photoError: false
         }));
-        // Log des IDs pour debug
-        console.log('=== DEBUG LISTINGS IDS (après mapping) ===');
-        listings.forEach((l: any, idx: number) => {
-          console.log(`#${idx} | id:`, l.id, '| user_id:', l.user_id);
-        });
         this.listings.set(listings);
         this.isLoading.set(false);
       },
